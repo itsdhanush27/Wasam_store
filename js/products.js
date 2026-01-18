@@ -56,7 +56,8 @@ async function initProducts() {
     }
 
     console.log(`Fetching API with query: ${apiQuery}`);
-    const response = await fetch(`http://localhost:3000/api/search?query=${encodeURIComponent(apiQuery)}`);
+    // Use relative path for production compatibility
+    const response = await fetch(`/api/search?query=${encodeURIComponent(apiQuery)}`);
     const data = await response.json();
 
     if (data.data && data.data.products) {

@@ -179,7 +179,8 @@
                         descEl.innerHTML = product.description;
                     } else {
                         descEl.textContent = 'Loading product details...';
-                        fetch(`http://localhost:3000/api/product?asin=${product.id}`)
+                        // Use relative path for production compatibility
+                        fetch(`/api/product?asin=${product.id}`)
                             .then(res => res.json())
                             .then(data => {
                                 if (data.data && (data.data.product_description || data.data.about_product)) {
