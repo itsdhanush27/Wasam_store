@@ -22,12 +22,18 @@ const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 app.get('/api/search', async (req, res) => {
     const { query } = req.query;
 
-    if (!query) {
-        return res.status(400).json({ error: 'Query parameter is required' });
+    console.log(`[API] Searching for: ${query}`);
+
+    // Debug: Check if key exists (don't log the full key for security)
+    if (!RAPIDAPI_KEY) {
+        console.error('[API] CRITICAL: RAPIDAPI_KEY is undefined!');
+        return res.status(500).json({ error: 'API Key is missing on server environment' });
+    } else {
+        console.log('[API] Check: RAPIDAPI_KEY is present (Length: ' + RAPIDAPI_KEY.length + ')');
     }
 
-    if (!RAPIDAPI_KEY) {
-        return res.status(500).json({ error: 'API Key is missing on server' });
+    if (!query) {
+        return res.status(400).json({ error: 'Query parameter is required' });
     }
 
     try {
@@ -44,10 +50,14 @@ app.get('/api/search', async (req, res) => {
                 'X-RapidAPI-Host': RAPIDAPI_HOST
             }
         });
+        console.log('[API] Success: Got data from RapidAPI');
         res.json(response.data);
     } catch (error) {
-        console.error('API Error:', error.message);
-        // Return mock data fallback if API fails (optional, good for dev)
+        console.error('[API] Request Failed:', error.message);
+        if (error.response) {
+            console.error('[API] Response Status:', error.response.status);
+            console.error('[API] Response Data:', JSON.stringify(error.response.data));
+        }
         res.status(500).json({
             error: 'Failed to fetch data from Amazon API',
             details: error.response ? error.response.data : error.message
