@@ -1,0 +1,158 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "title": "Amazon Fire TV Stick 4K Max streaming device",
+      "price": 39.99,
+      "category": "Electronics",
+      "subcategory": "TV & Video",
+      "image": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80",
+      "badge": "Latest",
+      "amazon_url": "https://www.amazon.com/dp/B08KTKGEFW",
+      "description": "Upgrade your entertainment with the powerful Fire TV Stick 4K Max. 40% more powerful than Fire TV Stick 4K, with faster app starts and more fluid navigation. Wi-Fi 6 support for smoother 4K streaming."
+    },
+    {
+      "id": 2,
+      "title": "JBL Tune 660NC: Wireless On-Ear Headphones with Active Noise Cancellation",
+      "price": 49.95,
+      "category": "Electronics",
+      "subcategory": "Audio",
+      "image": "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80",
+      "badge": "50% OFF",
+      "amazon_url": "https://www.amazon.com/dp/B08WHQG2R9",
+      "description": "The JBL Tune 660NC Wireless Headphones feature renowned JBL Pure Bass Sound, which can be found in the most famous venues all around the world. Keep the noise out and enjoy your music with Active Noise Cancelling."
+    },
+    {
+      "id": 3,
+      "title": "HP DeskJet 2755e Wireless Color All-in-One Printer",
+      "price": 59.99,
+      "category": "Electronics",
+      "subcategory": "Computers",
+      "image": "https://images.unsplash.com/photo-1612478474929-455b7740523e?auto=format&fit=crop&w=800&q=80",
+      "badge": "Latest",
+      "amazon_url": "https://www.amazon.com/dp/B08XYP6BUE",
+      "description": "Perfect for home - Print basic color documents like recipes, forms and travel documents. Key features include print, copy, scan, wireless printing, and mobile fax."
+    },
+    {
+      "id": 4,
+      "title": "Google Nest WiFi Pro - Wi-Fi 6E Mesh Router",
+      "price": 119.99,
+      "category": "Electronics",
+      "subcategory": "Networking",
+      "image": "https://images.unsplash.com/photo-1544197150-b99a580bbcbf?auto=format&fit=crop&w=800&q=80",
+      "badge": "Top Rated",
+      "amazon_url": "https://www.amazon.com/dp/B0BCW16D4F",
+      "description": "Nest Wifi Pro is built for the future of Wi-Fi. It uses the latest Wi-Fi 6E technology, so it's up to 2x faster than Wi-Fi 6. It provides a reliable connection for your entire home."
+    },
+    {
+      "id": 5,
+      "title": "Apple AirTag 4 Pack",
+      "price": 79.00,
+      "category": "Electronics",
+      "subcategory": "Accessories",
+      "image": "https://images.unsplash.com/photo-1633181829871-2dc04f98125f?auto=format&fit=crop&w=800&q=80",
+      "badge": "Latest",
+      "amazon_url": "https://www.amazon.com/dp/B0933BVK6T",
+      "description": "Keep track of and find your items alongside friends and devices in the Find My app. Simple one-tap setup instantly connects AirTag with your iPhone or iPad."
+    },
+    {
+      "id": 6,
+      "title": "KitchenAid Artisan Series 5 Quart Tilt-Head Stand Mixer",
+      "price": 349.95,
+      "category": "Home",
+      "subcategory": "Kitchen Appliances",
+      "image": "https://images.unsplash.com/photo-1594385208974-2e75f8d7bb48?auto=format&fit=crop&w=800&q=80",
+      "badge": "Premium",
+      "amazon_url": "https://www.amazon.com/dp/B00005UP2P",
+      "description": "Build your culinary center with the KitchenAid Artisan Series 5 Quart Tilt-Head Stand Mixer. Make up to 9 dozen cookies in a single batch. Dishwasher safe parts."
+    },
+    {
+      "id": 7,
+      "title": "Blink Mini 2 - Plug-in smart security camera",
+      "price": 29.99,
+      "category": "Electronics",
+      "subcategory": "Smart Home",
+      "image": "https://images.unsplash.com/photo-1558002038-1091a16617ce?auto=format&fit=crop&w=800&q=80",
+      "badge": "Latest",
+      "amazon_url": "https://www.amazon.com/dp/B0B1N5K2V8",
+      "description": "See what's happening inside or outside your home with the Blink Mini 2. Features HD night view in color, a built-in spotlight, and two-way audio."
+    },
+    {
+      "id": 8,
+      "title": "Amazon Smart Plug | Works with Alexa",
+      "price": 19.99,
+      "category": "Electronics",
+      "subcategory": "Smart Home",
+      "image": "https://images.unsplash.com/photo-1574359411659-fab97d39bee3?auto=format&fit=crop&w=800&q=80",
+      "badge": "",
+      "amazon_url": "https://www.amazon.com/dp/B089DR29T6",
+      "description": "Amazon Smart Plug lets you voice control your lights, fans, coffee makers, and more. All you need is an Alexa-enabled device like Echo, Fire TV, or Sonos One."
+    },
+    {
+      "id": 9,
+      "title": "JBL Go 3: Portable Speaker with Bluetooth",
+      "price": 29.95,
+      "category": "Electronics",
+      "subcategory": "Audio",
+      "image": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=800&q=80",
+      "badge": "Latest",
+      "amazon_url": "https://www.amazon.com/dp/B08KSAXK8G",
+      "description": "JBL Go 3 features bold styling and rich JBL Pro Sound. With its new eye-catching edgy design, colorful fabrics and expressive details this a must-have accessory for your next outing."
+    },
+    {
+      "id": 10,
+      "title": "roborock S7 Max Ultra Robot Vacuum and Mop",
+      "price": 949.99,
+      "category": "Home",
+      "subcategory": "Cleaning",
+      "image": "https://images.unsplash.com/photo-1518640027989-130504d7112a?auto=format&fit=crop&w=800&q=80",
+      "badge": "High End",
+      "amazon_url": "https://www.amazon.com/dp/B0BVD5G5M6",
+      "description": "Reviewers love the Roborock S7 Max Ultra for its massive time-saving capabilities. It vacuums, mops, washes the mop, empties the dustbin, and refills the water tank automatically."
+    },
+    {
+      "id": 11,
+      "title": "Instant Pot Pro 10-in-1 Pressure Cooker",
+      "price": 129.95,
+      "category": "Home",
+      "subcategory": "Kitchen Appliances",
+      "image": "https://images.unsplash.com/photo-1590499092873-13840679822a?auto=format&fit=crop&w=800&q=80",
+      "badge": "Best Seller",
+      "amazon_url": "https://www.amazon.com/dp/B08PQ2KWHS",
+      "description": "The Instant Pot Pro is designed for the home chef looking for a multi-purpose cooker with faster pre-heating and overall cooking time. 10 functions in 1 appliance."
+    },
+    {
+      "id": 12,
+      "title": "CeraVe Moisturizing Cream | Body and Face Moisturizer",
+      "price": 17.78,
+      "category": "Beauty",
+      "subcategory": "Skincare",
+      "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80",
+      "badge": "Latest",
+      "amazon_url": "https://www.amazon.com/dp/B00TTD9BRC",
+      "description": "CeraVe Moisturizing Cream serves as a rich, non-greasy, fast-absorbing moisturizer for delicate skin on the face and body. Restores the protective skin barrier with essential ceramides."
+    },
+    {
+      "id": 13,
+      "title": "Levi's Men's 505 Regular Fit Jeans",
+      "price": 41.99,
+      "category": "Fashion",
+      "subcategory": "Men's Fashion",
+      "image": "https://images.unsplash.com/photo-1542272617-08f0863200ed?auto=format&fit=crop&w=800&q=80",
+      "badge": "Classic",
+      "amazon_url": "https://www.amazon.com/dp/B0018OT4E8",
+      "description": "The original zip fly jeans. First created in 1967, the 505 Regular is one of the most popular straight fits. Beloved for its classic straight leg style."
+    },
+    {
+      "id": 14,
+      "title": "Optimum Nutrition Gold Standard 100% Whey Protein Powder",
+      "price": 44.99,
+      "category": "Health",
+      "subcategory": "Supplements",
+      "image": "https://images.unsplash.com/photo-1593095948071-474c5cc2989d?auto=format&fit=crop&w=800&q=80",
+      "badge": "Latest",
+      "amazon_url": "https://www.amazon.com/dp/B000QSNYGI",
+      "description": "Gold Standard 100% Whey blend – 24g blended protein consisting of whey protein isolate, whey protein concentrate, and whey peptides to support lean muscle mass."
+    }
+  ]
+}

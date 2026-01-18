@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Explore a handpicked selection of premium products from trusted brands and retailers. Find carefully curated items for smart shopping decisions.">
+    <title>Wasam.store - Honest Finds | Best Products & Deals</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/logo.png">
+</head>
+
+<body>
+    <!-- Header -->
+
+    <header class="header">
+        <div class="header-main">
+            <!-- Logo -->
+            <a href="index.html" class="logo">
+                <img src="assets/logo.png" alt="Wasam.store">
+                <div class="logo-text">
+                    <span class="logo-name">Wasam.store</span>
+                    <span class="logo-tagline">Honest Finds</span>
+                </div>
+            </a>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off">
+                    <button type="button" id="searchBtn" aria-label="Search">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="header-actions">
+                <!-- Globe Button -->
+                <button class="globe-btn" id="globeBtn" aria-label="Select Country">
+                    <span id="currentCountryDisplay">🌎</span>
+                    <div class="country-dropdown" id="countryDropdown"></div>
+                </button>
+
+                <!-- Join Our Team Button -->
+                <a href="contact.html" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 7.65l8.42 8.42 8.42-8.42a5.4 5.4 0 0 0 0-7.65z" />
+                    </svg>
+                    <span>Join Our Team</span>
+                </a>
+
+                <!-- Login Button -->
+                <a href="login.html" class="btn btn-outline">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                        <polyline points="10 17 15 12 10 7" />
+                        <line x1="15" y1="12" x2="3" y2="12" />
+                    </svg>
+                    <span>Login</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-container">
+                <!-- Electronics & Gadgets -->
+                <div class="nav-item">
+                    <a href="products.html?category=Electronics" class="nav-link">
+                        Electronics & Gadgets
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=audio%20wearables">Audio & Wearables</a>
+                        <a href="products.html?search=cameras%20gaming">Cameras & Gaming</a>
+                        <a href="products.html?search=computers%20laptops">Computers & Laptops</a>
+                        <a href="products.html?search=mobile%20accessories">Mobiles & Accessories</a>
+                        <a href="products.html?search=smart%20home">Smart Home</a>
+                    </div>
+                </div>
+
+                <!-- Home, Kitchen & Living -->
+                <div class="nav-item">
+                    <a href="products.html?category=Home" class="nav-link">
+                        Home, Kitchen & Living
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=kitchen%20appliances">Kitchen Appliances</a>
+                        <a href="products.html?search=home%20decor">Home Decor</a>
+                        <a href="products.html?search=bedding%20bath">Bedding & Bath</a>
+                        <a href="products.html?search=furniture">Furniture</a>
+                    </div>
+                </div>
+
+                <!-- Fashion & Lifestyle -->
+                <div class="nav-item">
+                    <a href="products.html?category=Fashion" class="nav-link">
+                        Fashion & Lifestyle
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=mens%20fashion">Men's Fashion</a>
+                        <a href="products.html?search=womens%20fashion">Women's Fashion</a>
+                        <a href="products.html?search=fashion%20accessories">Accessories</a>
+                    </div>
+                </div>
+
+                <!-- Beauty & Personal Care -->
+                <div class="nav-item">
+                    <a href="products.html?category=Beauty" class="nav-link">
+                        Beauty & Personal Care
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=skincare">Skincare</a>
+                        <a href="products.html?search=haircare">Haircare</a>
+                        <a href="products.html?search=makeup">Makeup</a>
+                    </div>
+                </div>
+
+                <!-- Health & Household -->
+                <div class="nav-item">
+                    <a href="products.html?category=Health" class="nav-link">
+                        Health & Household
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=fitness">Fitness</a>
+                        <a href="products.html?search=supplements">Supplements</a>
+                    </div>
+                </div>
+
+                <!-- See All -->
+                <div class="nav-item">
+                    <a href="products.html" class="nav-link">
+                        See All
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=sports%20fitness">Sports, Fitness & Outdoors</a>
+                        <a href="products.html?search=toys%20games">Baby, Kids & Toys</a>
+                        <a href="products.html?search=pet%20supplies">Pets & Pet Supplies</a>
+                        <a href="products.html?search=automotive">Automotive & Accessories</a>
+                        <a href="products.html?search=office%20products">Office & Stationery</a>
+                        <a href="products.html?search=tools%20hardware">Tools, Hardware & Improvement</a>
+                        <a href="products.html?search=electronics">Miscellaneous</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content fade-in">
+            <h1>Discover Amazing<br><span>Products & Deals</span></h1>
+            <p>Explore a handpicked selection of premium products from trusted brands and retailers. We carefully curate
+                the best items to help you make informed, smart shopping decisions, all while ensuring top-quality and
+                value for your money.</p>
+            <div class="hero-buttons">
+                <a href="products.html" class="btn btn-primary">Explore All Products</a>
+                <a href="about.html" class="btn btn-outline">Learn More</a>
+            </div>
+
+            <!-- Affiliate Disclosure -->
+            <div class="affiliate-disclosure">
+                <strong>Affiliate Disclosure:</strong> We participate in affiliate marketing programs and may earn a
+                commission from qualifying purchases at no additional cost to you. Product availability is subject to
+                change.
+            </div>
+        </div>
+    </section>
+
+    <!-- Feature Cards -->
+    <section class="features">
+        <div class="features-grid">
+            <div class="feature-card fade-in">
+                <div class="feature-icon">✓</div>
+                <h3>Carefully Curated Products</h3>
+                <p>Every product is hand-selected for quality, value, and reliability. We feature only the highest-rated
+                    products with thousands of positive customer reviews.</p>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-icon">★</div>
+                <h3>Premium Quality Guaranteed</h3>
+                <p>We carefully select and highlight quality products from trusted retailers. Each item is verified for
+                    authenticity and excellence.</p>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-icon">🔒</div>
+                <h3>Trusted Shopping Experience</h3>
+                <p>All products link directly to trusted retailers for secure, reliable purchasing. Shop with confidence
+                    knowing you're getting the best deals.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Latest Products Section -->
+    <section class="products-section">
+        <div class="products-container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Latest Products</h2>
+                    <p class="section-subtitle">New arrivals and trending products</p>
+                </div>
+                <a href="products.html" class="section-link">
+                    View Latest (Last 24 Hours)
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="products-grid" id="latestProducts">
+                <!-- Products will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Electronics Section -->
+    <section class="products-section" style="background: var(--bg-light);">
+        <div class="products-container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Electronics & Gadgets Products</h2>
+                    <p class="section-subtitle">Latest tech and gadgets</p>
+                </div>
+                <a href="products.html?category=Electronics" class="section-link">
+                    View All
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="products-grid" id="electronicsProducts">
+                <!-- Products will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Home & Kitchen Section -->
+    <section class="products-section">
+        <div class="products-container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Home, Kitchen & Living Products</h2>
+                    <p class="section-subtitle">Essential items for your home</p>
+                </div>
+                <a href="products.html?category=Home" class="section-link">
+                    View All
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="products-grid" id="homeProducts">
+                <!-- Products will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Fashion Section -->
+    <section class="products-section" style="background: var(--bg-light);">
+        <div class="products-container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Fashion & Lifestyle Products</h2>
+                    <p class="section-subtitle">Style for every occasion</p>
+                </div>
+                <a href="products.html?category=Fashion" class="section-link">
+                    View All
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="products-grid" id="fashionProducts">
+                <!-- Products will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Beauty Section -->
+    <section class="products-section">
+        <div class="products-container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Beauty & Personal Care Products</h2>
+                    <p class="section-subtitle">Look and feel your best</p>
+                </div>
+                <a href="products.html?category=Beauty" class="section-link">
+                    View All
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="products-grid" id="beautyProducts">
+                <!-- Products will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Health Section -->
+    <section class="products-section" style="background: var(--bg-light);">
+        <div class="products-container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Health & Household Products</h2>
+                    <p class="section-subtitle">Wellness essentials</p>
+                </div>
+                <a href="products.html?category=Health" class="section-link">
+                    View All
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="products-grid" id="healthProducts">
+                <!-- Products will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <img src="assets/logo.png" alt="Wasam.Pick">
+                    <p>Your trusted source for quality products. We curate the best items from trusted retailers to help
+                        you make smart shopping decisions.</p>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="products.html">All Products</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                        <li><a href="contact.html">Join Our Team</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="terms.html">Terms & Conditions</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-disclosure">
+                <p><strong>Affiliate Disclosure:</strong> We participate in affiliate marketing programs and may earn a
+                    commission from qualifying purchases at no additional cost to you. Product availability is subject
+                    to change.</p>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 wasam.store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/products.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

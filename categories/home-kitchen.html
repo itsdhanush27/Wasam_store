@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home, Kitchen & Living | Wasam.store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-main">
+            <a href="../index.html" class="logo"><img src="../assets/logo.png" alt="Wasam.Pick"></a>
+            <div class="search-container">
+                <div class="search-bar"><input type="text" placeholder="Search products..."><button><svg width="20"
+                            height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg></button></div>
+            </div>
+            <div class="header-actions"><a href="../contact.html" class="btn btn-primary">Join Our Team</a><a
+                    href="../login.html" class="btn btn-outline">Login</a></div>
+        </div>
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="nav-item"><a href="electronics.html" class="nav-link">Electronics & Gadgets</a></div>
+                <div class="nav-item"><a href="home-kitchen.html" class="nav-link" style="color:#8B5CF6;">Home, Kitchen
+                        & Living</a></div>
+                <div class="nav-item"><a href="fashion.html" class="nav-link">Fashion & Lifestyle</a></div>
+                <div class="nav-item"><a href="beauty.html" class="nav-link">Beauty & Personal Care</a></div>
+                <div class="nav-item"><a href="health.html" class="nav-link">Health & Household</a></div>
+                <div class="nav-item"><a href="../products.html" class="nav-link">See All</a></div>
+            </div>
+        </nav>
+    </header>
+    <div style="background:rgba(139,92,246,0.1);padding:12px 24px;text-align:center;font-size:14px;color:#6B7280;">
+        <strong>Affiliate Disclosure:</strong> We participate in affiliate marketing programs and may earn a commission
+        from qualifying purchases at no additional cost to you.</div>
+    <section class="products-section">
+        <div class="products-container">
+            <div class="section-header">
+                <div>
+                    <h1 class="section-title">Home, Kitchen & Living</h1>
+                    <p class="section-subtitle">Kitchen appliances, home decor, bedding, and furniture</p>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;">
+                <a href="#appliances" class="btn btn-outline" style="font-size:13px;padding:8px 16px;">Kitchen
+                    Appliances</a>
+                <a href="#decor" class="btn btn-outline" style="font-size:13px;padding:8px 16px;">Home Decor</a>
+                <a href="#bedding" class="btn btn-outline" style="font-size:13px;padding:8px 16px;">Bedding & Bath</a>
+                <a href="#furniture" class="btn btn-outline" style="font-size:13px;padding:8px 16px;">Furniture</a>
+            </div>
+            <div class="products-grid" id="categoryProducts"></div>
+        </div>
+    </section>
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand"><img src="../assets/logo.png" alt="Wasam.Pick">
+                    <p>Your trusted source for quality products.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="../products.html">All Products</a></li>
+                        <li><a href="../about.html">About Us</a></li>
+                        <li><a href="../contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="../terms.html">Terms & Conditions</a></li>
+                        <li><a href="../privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-disclosure">
+                <p><strong>Affiliate Disclosure:</strong> We participate in affiliate marketing programs and may earn a
+                    commission from qualifying purchases at no additional cost to you.</p>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 wasam.store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        async function loadCategoryProducts() { try { const r = await fetch('../data/products.json'); const d = await r.json(); const p = d.products.filter(p => p.category === 'Home'); document.getElementById('categoryProducts').innerHTML = p.map(product => `<a href="../product.html?id=${product.id}" class="product-card"><div class="product-image">${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}<img src="${product.image}" alt="${product.title}" loading="lazy"></div><div class="product-info"><span class="product-category">${product.subcategory || product.category}</span><h3 class="product-title">${product.title}</h3><p class="product-price">$${product.price.toFixed(2)}</p><button class="product-btn">See Details</button></div></a>`).join(''); } catch (e) { console.error(e); } } document.addEventListener('DOMContentLoaded', loadCategoryProducts);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Shop Electronics & Gadgets at Wasam.store - Audio, Cameras, Computers, Mobiles, Smart Home">
+    <title>Electronics & Gadgets | Wasam.store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/png" href="../assets/logo.png">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-main">
+            <a href="../index.html" class="logo">
+                <img src="../assets/logo.png" alt="Wasam.store">
+                <div class="logo-text">
+                    <span class="logo-name">Wasam.store</span>
+                    <span class="logo-tagline">Honest Finds</span>
+                </div>
+            </a>
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search products...">
+                    <button type="button" id="searchBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg></button>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="../contact.html" class="btn btn-primary">Join Our Team</a>
+                <a href="../login.html" class="btn btn-outline">Login</a>
+            </div>
+        </div>
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="nav-item"><a href="electronics.html" class="nav-link" style="color: #8B5CF6;">Electronics &
+                        Gadgets</a></div>
+                <div class="nav-item"><a href="home-kitchen.html" class="nav-link">Home, Kitchen & Living</a></div>
+                <div class="nav-item"><a href="fashion.html" class="nav-link">Fashion & Lifestyle</a></div>
+                <div class="nav-item"><a href="beauty.html" class="nav-link">Beauty & Personal Care</a></div>
+                <div class="nav-item"><a href="health.html" class="nav-link">Health & Household</a></div>
+                <div class="nav-item"><a href="../products.html" class="nav-link">See All</a></div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Affiliate Disclosure -->
+    <div
+        style="background: rgba(139, 92, 246, 0.1); padding: 12px 24px; text-align: center; font-size: 14px; color: #6B7280;">
+        <strong>Affiliate Disclosure:</strong> We participate in affiliate marketing programs and may earn a commission
+        from qualifying purchases at no additional cost to you. Product availability is subject to change.
+    </div>
+
+    <!-- Category Content -->
+    <section class="products-section">
+        <div class="products-container">
+            <div class="section-header">
+                <div>
+                    <h1 class="section-title">Electronics & Gadgets</h1>
+                    <p class="section-subtitle">Latest tech, audio, cameras, computers, and smart home devices</p>
+                </div>
+            </div>
+
+            <!-- Subcategory Links -->
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;">
+                <a href="#audio" class="btn btn-outline" style="font-size: 13px; padding: 8px 16px;">Audio &
+                    Wearables</a>
+                <a href="#cameras" class="btn btn-outline" style="font-size: 13px; padding: 8px 16px;">Cameras &
+                    Gaming</a>
+                <a href="#computers" class="btn btn-outline" style="font-size: 13px; padding: 8px 16px;">Computers &
+                    Laptops</a>
+                <a href="#mobiles" class="btn btn-outline" style="font-size: 13px; padding: 8px 16px;">Mobiles &
+                    Accessories</a>
+                <a href="#smart-home" class="btn btn-outline" style="font-size: 13px; padding: 8px 16px;">Smart Home</a>
+            </div>
+
+            <div class="products-grid" id="categoryProducts"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <img src="../assets/logo.png" alt="Wasam.Pick">
+                    <p>Your trusted source for quality products.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="../products.html">All Products</a></li>
+                        <li><a href="../about.html">About Us</a></li>
+                        <li><a href="../contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="../terms.html">Terms & Conditions</a></li>
+                        <li><a href="../privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-disclosure">
+                <p><strong>Affiliate Disclosure:</strong> We participate in affiliate marketing programs and may earn a
+                    commission from qualifying purchases at no additional cost to you.</p>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 wasam.store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Load electronics products
+        async function loadCategoryProducts() {
+            try {
+                const response = await fetch('../data/products.json');
+                const data = await response.json();
+                const products = data.products.filter(p => p.category === 'Electronics');
+
+                const container = document.getElementById('categoryProducts');
+                container.innerHTML = products.map(product => `
+          <a href="../product.html?id=${product.id}" class="product-card">
+            <div class="product-image">
+              ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
+              <img src="${product.image}" alt="${product.title}" loading="lazy">
+            </div>
+            <div class="product-info">
+              <span class="product-category">${product.subcategory || product.category}</span>
+              <h3 class="product-title">${product.title}</h3>
+              <p class="product-price">$${product.price.toFixed(2)}</p>
+              <button class="product-btn">See Details</button>
+            </div>
+          </a>
+        `).join('');
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadCategoryProducts);
+    </script>
+</body>
+
+</html>

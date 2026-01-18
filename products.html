@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Browse all products at Wasam.store - Electronics, Home, Fashion, Beauty, and more.">
+    <title>All Products | Wasam.store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="assets/logo.png">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-main">
+            <a href="index.html" class="logo">
+                <img src="assets/logo.png" alt="Wasam.store">
+                <div class="logo-text">
+                    <span class="logo-name">Wasam.store</span>
+                    <span class="logo-tagline">Honest Finds</span>
+                </div>
+            </a>
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off">
+                    <button type="button" id="searchBtn" aria-label="Search">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="globe-btn" id="globeBtn" aria-label="Select Country">
+                    <span id="currentCountryDisplay">🌎</span>
+                    <div class="country-dropdown" id="countryDropdown"></div>
+                </button>
+                <a href="contact.html" class="btn btn-primary"><span>Join Our Team</span></a>
+                <a href="login.html" class="btn btn-outline"><span>Login</span></a>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="nav-item">
+                    <a href="products.html?category=Electronics" class="nav-link">Electronics & Gadgets <svg
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg></a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=audio%20wearables">Audio & Wearables</a>
+                        <a href="products.html?search=cameras%20gaming">Cameras & Gaming</a>
+                        <a href="products.html?search=computers%20laptops">Computers & Laptops</a>
+                        <a href="products.html?search=mobile%20accessories">Mobiles & Accessories</a>
+                        <a href="products.html?search=smart%20home">Smart Home</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a href="products.html?category=Home" class="nav-link">Home, Kitchen & Living <svg
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg></a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=kitchen%20appliances">Kitchen Appliances</a>
+                        <a href="products.html?search=home%20decor">Home Decor</a>
+                        <a href="products.html?search=bedding%20bath">Bedding & Bath</a>
+                        <a href="products.html?search=furniture">Furniture</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a href="products.html?category=Fashion" class="nav-link">Fashion & Lifestyle <svg
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg></a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=mens%20fashion">Men's Fashion</a>
+                        <a href="products.html?search=womens%20fashion">Women's Fashion</a>
+                        <a href="products.html?search=fashion%20accessories">Accessories</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a href="products.html?category=Beauty" class="nav-link">Beauty & Personal Care <svg
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg></a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=skincare">Skincare</a>
+                        <a href="products.html?search=haircare">Haircare</a>
+                        <a href="products.html?search=makeup">Makeup</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a href="products.html?category=Health" class="nav-link">Health & Household <svg viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg></a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=fitness">Fitness</a>
+                        <a href="products.html?search=supplements">Supplements</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a href="products.html" class="nav-link">See All <svg viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg></a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=sports%20fitness">Sports, Fitness & Outdoors</a>
+                        <a href="products.html?search=toys%20games">Baby, Kids & Toys</a>
+                        <a href="products.html?search=pet%20supplies">Pets & Pet Supplies</a>
+                        <a href="products.html?search=automotive">Automotive & Accessories</a>
+                        <a href="products.html?search=office%20products">Office & Stationery</a>
+                        <a href="products.html?search=tools%20hardware">Tools, Hardware & Improvement</a>
+                        <a href="products.html?search=electronics">Miscellaneous</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Affiliate Disclosure -->
+    <div
+        style="background: rgba(139, 92, 246, 0.1); padding: 12px 24px; text-align: center; font-size: 14px; color: #6B7280;">
+        <strong>Affiliate Disclosure:</strong> We participate in affiliate marketing programs and may earn a commission
+        from qualifying purchases at no additional cost to you. Product availability is subject to change.
+    </div>
+
+    <!-- Main Content with Sidebar -->
+    <div class="main-layout">
+        <main>
+            <div class="section-header">
+                <div>
+                    <h1 class="section-title">All Products</h1>
+                    <p class="section-subtitle" id="productCount">Loading products...</p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <label for="categoryFilter" style="font-size: 14px; color: #6B7280;">Filter:</label>
+                    <select id="categoryFilter"
+                        style="padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 14px;">
+                        <option value="all">All Categories</option>
+                        <option value="Electronics">Electronics & Gadgets</option>
+                        <option value="Home">Home, Kitchen & Living</option>
+                        <option value="Fashion">Fashion & Lifestyle</option>
+                        <option value="Beauty">Beauty & Personal Care</option>
+                        <option value="Health">Health & Household</option>
+                        <option value="Sports">Sports & Outdoors</option>
+                        <option value="Baby">Baby, Kids & Toys</option>
+                        <option value="Pets">Pets & Pet Supplies</option>
+                        <option value="Automotive">Automotive</option>
+                        <option value="Office">Office & Stationery</option>
+                        <option value="Tools">Tools & Hardware</option>
+                        <option value="Miscellaneous">Miscellaneous</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="products-grid" id="allProducts">
+                <!-- Products loaded dynamically -->
+            </div>
+        </main>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Trending Products</h3>
+                <div id="sidebarProducts">
+                    <!-- Sidebar products loaded dynamically -->
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Categories</h3>
+                <ul style="display: flex; flex-direction: column; gap: 8px;">
+                    <li><a href="products.html?category=Electronics"
+                            style="color: #6B7280; font-size: 14px;">Electronics &
+                            Gadgets</a></li>
+                    <li><a href="products.html?category=Home" style="color: #6B7280; font-size: 14px;">Home, Kitchen &
+                            Living</a></li>
+                    <li><a href="products.html?category=Fashion" style="color: #6B7280; font-size: 14px;">Fashion &
+                            Lifestyle</a></li>
+                    <li><a href="products.html?category=Beauty" style="color: #6B7280; font-size: 14px;">Beauty &
+                            Personal
+                            Care</a></li>
+                    <li><a href="products.html?category=Health" style="color: #6B7280; font-size: 14px;">Health &
+                            Household</a>
+                    </li>
+                    <li><a href="products.html?search=sports" style="color: #6B7280; font-size: 14px;">Sports &
+                            Outdoors</a>
+                    </li>
+                    <li><a href="products.html?search=baby%20kids" style="color: #6B7280; font-size: 14px;">Baby, Kids &
+                            Toys</a></li>
+                    <li><a href="products.html?search=pets" style="color: #6B7280; font-size: 14px;">Pets & Pet
+                            Supplies</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <img src="assets/logo.png" alt="Wasam.Pick">
+                    <p>Your trusted source for quality products.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="products.html">All Products</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="terms.html">Terms & Conditions</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-disclosure">
+                <p><strong>Affiliate Disclosure:</strong> We participate in affiliate marketing programs and may earn a
+                    commission from qualifying purchases at no additional cost to you. Product availability is subject
+                    to change.</p>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 wasam.store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/products.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        // Load all products on page load
+        // Load all products on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialization is now handled by products.js initProducts()
+
+            // Category filter
+            const categoryFilter = document.getElementById('categoryFilter');
+            if (categoryFilter) {
+                categoryFilter.addEventListener('change', function () {
+                    loadAllProducts(this.value);
+                });
+            }
+
+            // Real-time Search Filter (Client-side filtering of loaded results)
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    const query = this.value;
+                    const results = searchProducts(query);
+                    const container = document.getElementById('allProducts');
+
+                    if (results.length === 0) {
+                        container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">No products found matching your search.</div>';
+                    } else {
+                        container.innerHTML = results.map(p => createProductCard(p)).join('');
+                    }
+
+                    const countText = results.length === 1 ? 'product' : 'products';
+                    document.getElementById('productCount').textContent = `${results.length} ${countText} found`;
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
