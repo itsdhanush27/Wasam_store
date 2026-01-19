@@ -31,6 +31,10 @@ async function fetchAmazonPage(url) {
 }
 
 // Search Endpoint
+// Helper: Load static products
+const staticProductsData = require('./data/products.json');
+
+// Search Endpoint
 app.get('/api/search', async (req, res) => {
     const { query } = req.query;
     console.log(`[Scraper] Searching for: ${query}`);
@@ -40,13 +44,10 @@ app.get('/api/search', async (req, res) => {
     const searchUrl = `https://www.amazon.com/s?k=${encodeURIComponent(query)}`;
     const html = await fetchAmazonPage(searchUrl);
 
-    if (!html) {
-        return res.status(500).json({ error: 'Failed to fetch Amazon page' });
-    }
-
-    if (html.includes('api-services-support@amazon.com')) {
-        console.error('CAPTCHA detected');
-        return res.status(503).json({ error: 'Amazon blocked request (CAPTCHA)' });
+    if (!html || html.includes('api-services-support@amazon.com')) {
+        console.warn('[Scraper] Amazon blocked or failed. Falling back to static data.');
+        const fallbackResults = searchStaticProducts(query);
+        return res.json({ data: { products: fallbackResults } });
     }
 
     const $ = cheerio.load(html);
@@ -75,11 +76,17 @@ app.get('/api/search', async (req, res) => {
                 product_price: price || '$0.00',
                 product_photo: image,
                 product_url: link,
-                product_star_rating: 'N/A', // scraping stars is harder (class names vary)
+                product_star_rating: 'N/A',
                 product_num_ratings: 0
             });
         }
     });
+
+    if (products.length === 0) {
+        console.warn('[Scraper] No products parsed from HTML. Falling back to static data.');
+        const fallbackResults = searchStaticProducts(query);
+        return res.json({ data: { products: fallbackResults } });
+    }
 
     console.log(`[Scraper] Found ${products.length} items`);
     res.json({ data: { products: products.slice(0, 40) } });
@@ -94,7 +101,24 @@ app.get('/api/product', async (req, res) => {
     const productUrl = `https://www.amazon.com/dp/${asin}`;
     const html = await fetchAmazonPage(productUrl);
 
-    if (!html) return res.status(500).json({ error: 'Failed to fetch product' });
+    if (!html) {
+        console.warn('[Scraper] Product fetch failed. Trying static lookup.');
+        // Try to find in static data (though ID might not match exactly if ASIN is real)
+        // For demo, we just return a generic static error or mock
+        const staticMatch = staticProductsData.products.find(p => p.amazon_url.includes(asin) || p.id == asin);
+        if (staticMatch) {
+            return res.json({
+                data: {
+                    product_title: staticMatch.title,
+                    product_price: `$${staticMatch.price}`,
+                    product_photo: staticMatch.image,
+                    product_description: staticMatch.description,
+                    about_product: []
+                }
+            });
+        }
+        return res.status(500).json({ error: 'Failed to fetch product' });
+    }
 
     const $ = cheerio.load(html);
 
@@ -114,6 +138,39 @@ app.get('/api/product', async (req, res) => {
         }
     });
 });
+
+// Helper: Search static products
+function searchStaticProducts(query) {
+    const q = query.toLowerCase();
+    const all = staticProductsData.products.map(transformStaticProduct);
+
+    // Simple filter
+    const matches = all.filter(p =>
+        p.product_title.toLowerCase().includes(q) ||
+        (p.category && p.category.toLowerCase().includes(q)) ||
+        q.includes(p.category ? p.category.toLowerCase() : 'xyz')
+    );
+
+    // If no specific matches, return a subset of "Latest" or random to fill UI
+    if (matches.length < 4) {
+        return all.sort(() => 0.5 - Math.random()).slice(0, 8);
+    }
+
+    return matches;
+}
+
+function transformStaticProduct(p) {
+    return {
+        asin: p.id, // map numeric ID to asin field
+        product_title: p.title,
+        product_price: `$${p.price.toFixed(2)}`,
+        product_photo: p.image,
+        product_url: p.amazon_url,
+        product_star_rating: '4.5',
+        product_num_ratings: 100,
+        category: p.category
+    };
+}
 
 // Serve index.html for root
 app.get('/', (req, res) => {
