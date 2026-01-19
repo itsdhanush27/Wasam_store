@@ -1466,13 +1466,20 @@ ol {
 
   /* Show dropdown on click/hover logic needs JS or keep it simple */
   /* For simple CSS hover on mobile: */
-  .nav-item:active .dropdown-menu,
-  .nav-item:focus-within .dropdown-menu {
+  /* Show dropdown on click/hover logic needs JS or keep it simple */
+  /* For simple CSS hover on mobile: */
+  .nav-item.active .dropdown-menu {
     max-height: 500px;
     /* Expand */
     margin-bottom: var(--spacing-sm);
     padding-top: var(--spacing-sm);
     padding-bottom: var(--spacing-sm);
+  }
+
+  /* Rotate arrow when active */
+  .nav-item.active .nav-link svg {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
   }
 
   /* Grid Layouts */

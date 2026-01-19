@@ -172,6 +172,29 @@ document.addEventListener('DOMContentLoaded', function () {
             navContainer.classList.toggle('active');
             mobileMenuBtn.classList.toggle('active'); // Animate the button icon
         });
+
+        // Mobile Dropdown Toggle (Accordion Style)
+        const navLinks = document.querySelectorAll('.nav-link svg');
+        navLinks.forEach(arrow => {
+            arrow.addEventListener('click', function (e) {
+                // Only act if on mobile (or if we want this behavior everywhere, checking window width is safer if distinguishing)
+                // But generally, on desktop hover works, so checking if navContainer is fixed/mobile view is good practice
+                // However, simpler is to just allow it since desktop uses hover which won't conflict with click usually, 
+                // but let's be safe and stopPropagation.
+                if (window.innerWidth <= 768) {
+                    e.preventDefault(); // Prevent link navigation
+                    e.stopPropagation(); // Stop bubbling
+
+                    const navItem = this.closest('.nav-item');
+                    // Close other open items (optional, but nice for accordion feel)
+                    // document.querySelectorAll('.nav-item.active').forEach(item => {
+                    //     if (item !== navItem) item.classList.remove('active');
+                    // });
+
+                    navItem.classList.toggle('active');
+                }
+            });
+        });
     }
 
     // Animate elements on scroll
