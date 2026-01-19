@@ -1085,10 +1085,28 @@ ol {
   /* margin-bottom removed, handled by group */
 }
 
+@keyframes color-pulse {
+  0% {
+    color: var(--primary-color);
+    text-shadow: 0 0 5px rgba(139, 67, 156, 0.2);
+  }
+
+  50% {
+    color: #a55bbb;
+    text-shadow: 0 0 15px rgba(139, 67, 156, 0.5);
+  }
+
+  100% {
+    color: var(--primary-color);
+    text-shadow: 0 0 5px rgba(139, 67, 156, 0.2);
+  }
+}
+
 .footer-site-name {
   font-size: var(--font-size-2xl);
   font-weight: 700;
-  color: var(--bg-white);
+  color: var(--primary-color);
+  animation: color-pulse 3s infinite ease-in-out;
 }
 
 .footer-brand p {
