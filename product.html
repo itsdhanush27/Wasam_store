@@ -20,6 +20,12 @@
             <a href="index.html" class="logo">
                 <img src="assets/logo.png" alt="Wasam.Pick - Honest Finds">
             </a>
+            <!-- Mobile Menu Button -->
+            <button class="mobile-menu-btn" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <div class="search-container">
                 <div class="search-bar">
                     <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off">
@@ -161,37 +167,37 @@
             const productId = params.get('id');
 
             function renderFetchedProduct(product) {
-                 // Update page content
-                 document.title = `${product.title} | Wasam.store`;
-                 document.getElementById('productTitle').textContent = product.title;
-                 document.getElementById('productPrice').textContent = product.price ? `$${parseFloat(product.price.replace('$','')).toFixed(2)}` : 'Check Price';
-                 document.getElementById('productCategory').textContent = product.subcategory || product.category || 'Details';
-                 document.getElementById('productImage').src = product.image;
-                 document.getElementById('productImage').alt = product.title;
-                 document.getElementById('breadcrumbCategory').textContent = product.category || 'Product';
+                // Update page content
+                document.title = `${product.title} | Wasam.store`;
+                document.getElementById('productTitle').textContent = product.title;
+                document.getElementById('productPrice').textContent = product.price ? `$${parseFloat(product.price.replace('$', '')).toFixed(2)}` : 'Check Price';
+                document.getElementById('productCategory').textContent = product.subcategory || product.category || 'Details';
+                document.getElementById('productImage').src = product.image;
+                document.getElementById('productImage').alt = product.title;
+                document.getElementById('breadcrumbCategory').textContent = product.category || 'Product';
 
-                 const descEl = document.querySelector('.product-detail-description');
-                 descEl.innerHTML = product.description || 'No description available.';
+                const descEl = document.querySelector('.product-detail-description');
+                descEl.innerHTML = product.description || 'No description available.';
 
-                 const amazonLink = document.getElementById('amazonLink');
-                 // If we have a direct amazon_url use it, else fallback to search/dp link
-                 if (product.amazon_url) {
+                const amazonLink = document.getElementById('amazonLink');
+                // If we have a direct amazon_url use it, else fallback to search/dp link
+                if (product.amazon_url) {
                     amazonLink.href = product.amazon_url;
-                 } else {
+                } else {
                     amazonLink.href = `https://www.amazon.com/dp/${product.id}`; // id is ASIN
-                 }
-                 amazonLink.innerHTML = `
+                }
+                amazonLink.innerHTML = `
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                     </svg>
                     Check Price on Amazon`;
-                 amazonLink.style.display = 'inline-flex';
+                amazonLink.style.display = 'inline-flex';
             }
 
             function fetchAndRender() {
                 const descEl = document.querySelector('.product-detail-description');
                 descEl.textContent = 'Fetching product details...';
-                
+
                 fetch(`/api/product?asin=${productId}`)
                     .then(res => res.json())
                     .then(data => {
@@ -202,7 +208,7 @@
                                 title: p.product_title,
                                 price: p.product_price, // comes as string usually
                                 image: p.product_photo,
-                                description: p.product_description || (p.about_product ? `<ul>${p.about_product.map(x=>`<li>${x}</li>`).join('')}</ul>` : ''),
+                                description: p.product_description || (p.about_product ? `<ul>${p.about_product.map(x => `<li>${x}</li>`).join('')}</ul>` : ''),
                                 category: 'General',
                                 subcategory: 'Deal'
                             };
@@ -242,23 +248,23 @@
                             .then(res => res.json())
                             .then(data => {
                                 if (data.data) {
-                                     const fullDesc = data.data.product_description || 
+                                    const fullDesc = data.data.product_description ||
                                         (data.data.about_product ? `<ul>${data.data.about_product.map(p => `<li>${p}</li>`).join('')}</ul>` : '');
-                                     if(fullDesc) {
-                                         product.description = fullDesc;
-                                         descEl.innerHTML = fullDesc;
-                                     } else {
-                                         descEl.textContent = 'See Amazon for full details.';
-                                     }
+                                    if (fullDesc) {
+                                        product.description = fullDesc;
+                                        descEl.innerHTML = fullDesc;
+                                    } else {
+                                        descEl.textContent = 'See Amazon for full details.';
+                                    }
                                 }
                             })
                             .catch(err => descEl.textContent = 'Details unavailable');
                     }
-                    
+
                     // Button logic
                     const amazonLink = document.getElementById('amazonLink');
                     amazonLink.href = product.amazon_url || `https://www.amazon.com/dp/${product.id}`;
-                    
+
                     // Related
                     const related = getRelatedProducts(product, 4);
                     document.getElementById('relatedProducts').innerHTML = related.map(p => createProductCard(p)).join('');

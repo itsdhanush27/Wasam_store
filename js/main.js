@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (mobileMenuBtn && navContainer) {
         mobileMenuBtn.addEventListener('click', function () {
             navContainer.classList.toggle('active');
+            mobileMenuBtn.classList.toggle('active'); // Animate the button icon
         });
     }
 
