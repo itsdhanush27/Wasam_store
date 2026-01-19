@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
+// axios is no longer needed for main logic but check if you want to keep it.
+// We will simply require amazon-buddy.
+const amazonBuddy = require('amazon-buddy');
 const path = require('path');
 require('dotenv').config();
 
@@ -12,60 +14,61 @@ app.use(cors());
 app.use(express.static(path.join(__dirname), { extensions: ['html'] }));
 app.use(express.json());
 
-// RapidAPI Configuration
-// NOTE: These defaults are for "Real-Time Amazon Data" by LetsScrape.
-// If you use a different provider, updates these host/updates headers.
-const RAPIDAPI_HOST = process.env.RAPIDAPI_HOST || 'real-time-amazon-data.p.rapidapi.com';
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
-
-// Search Endpoint
+// Search Endpoint using amazon-buddy
 app.get('/api/search', async (req, res) => {
     const { query } = req.query;
 
-    console.log(`[API] Searching for: ${query}`);
-
-    // Debug: Check if key exists (don't log the full key for security)
-    if (!RAPIDAPI_KEY) {
-        console.error('[API] CRITICAL: RAPIDAPI_KEY is undefined!');
-        return res.status(500).json({ error: 'API Key is missing on server environment' });
-    } else {
-        console.log('[API] Check: RAPIDAPI_KEY is present (Length: ' + RAPIDAPI_KEY.length + ')');
-    }
+    console.log(`[Scraper] Searching for: ${query}`);
 
     if (!query) {
         return res.status(400).json({ error: 'Query parameter is required' });
     }
 
     try {
-        const response = await axios.get(`https://${RAPIDAPI_HOST}/search`, {
-            params: {
-                query: query,
-                page: '1',
-                country: 'US',
-                sort_by: 'RELEVANCE',
-                product_condition: 'ALL'
-            },
-            headers: {
-                'X-RapidAPI-Key': RAPIDAPI_KEY,
-                'X-RapidAPI-Host': RAPIDAPI_HOST
+        // Fetch products using amazon-buddy
+        // Limit to 40 items to prevent Vercel timeouts (10s limit)
+        const results = await amazonBuddy.products({ 
+            keyword: query, 
+            number: 40, 
+            country: 'US' 
+        });
+
+        if (!results || !results.result || results.result.length === 0) {
+            console.log('[Scraper] No results found.');
+            return res.json({ data: { products: [] } });
+        }
+
+        console.log(`[Scraper] Found ${results.result.length} products.`);
+
+        // Map amazon-buddy structure to our frontend's expected format (RapidAPI style)
+        const mappedProducts = results.result.map(item => ({
+            asin: item.asin,
+            product_title: item.title,
+            product_price: item.price && item.price.current_price ? `$${item.price.current_price}` : '$0.00',
+            product_photo: item.thumbnail,
+            product_star_rating: item.score,
+            product_num_ratings: item.reviews,
+            product_url: item.url,
+            is_best_seller: false // scraper might not return this, default false
+            // badge: not always available
+        }));
+
+        res.json({
+            data: {
+                products: mappedProducts
             }
         });
-        console.log('[API] Success: Got data from RapidAPI');
-        res.json(response.data);
+
     } catch (error) {
-        console.error('[API] Request Failed:', error.message);
-        if (error.response) {
-            console.error('[API] Response Status:', error.response.status);
-            console.error('[API] Response Data:', JSON.stringify(error.response.data));
-        }
+        console.error('[Scraper] Error:', error.message);
         res.status(500).json({
-            error: 'Failed to fetch data from Amazon API',
-            details: error.response ? error.response.data : error.message
+            error: 'Failed to scrape data',
+            details: error.message
         });
     }
 });
 
-// Product Details Endpoint
+// Product Details Endpoint using amazon-buddy
 app.get('/api/product', async (req, res) => {
     const { asin } = req.query;
 
@@ -74,19 +77,30 @@ app.get('/api/product', async (req, res) => {
     }
 
     try {
-        const response = await axios.get(`https://${RAPIDAPI_HOST}/product-details`, {
-            params: {
-                asin: asin,
-                country: 'US'
-            },
-            headers: {
-                'X-RapidAPI-Key': RAPIDAPI_KEY,
-                'X-RapidAPI-Host': RAPIDAPI_HOST
+        console.log(`[Scraper] Fetching details for ASIN: ${asin}`);
+        const details = await amazonBuddy.asin({ asin: asin, country: 'US' });
+
+        if (!details || !details.result || details.result.length === 0) {
+             return res.status(404).json({ error: 'Product not found' });
+        }
+
+        const product = details.result[0];
+
+        // Map to expected format
+        res.json({
+            data: {
+                product_title: product.title,
+                product_price: product.price ? product.price.current_price : '',
+                product_photo: product.main_image,
+                product_description: product.description,
+                about_product: product.features, // amazon-buddy often calls bullet points 'features'
+                product_star_rating: product.score,
+                product_num_ratings: product.reviews
             }
         });
-        res.json(response.data);
+
     } catch (error) {
-        console.error('API Error:', error.message);
+        console.error('[Scraper] Detail Error:', error.message);
         res.status(500).json({ error: 'Failed to fetch product details' });
     }
 });
@@ -103,6 +117,6 @@ module.exports = app;
 if (require.main === module) {
     app.listen(PORT, () => {
         console.log(`Server running at http://localhost:${PORT}`);
-        console.log(`Make sure to set your RAPIDAPI_KEY in the .env file!`);
+        console.log(`Using amazon-buddy scraper logic.`);
     });
 }
