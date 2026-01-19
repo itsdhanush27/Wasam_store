@@ -35,8 +35,12 @@ async function initHomepage() {
     { id: 'healthProducts', query: 'health household best sellers', limit: 4 }
   ];
 
-  // Fetch sections in parallel
-  await Promise.all(sections.map(section => loadSection(section)));
+  // Fetch sections sequentially with delay to avoid rate limiting
+  for (const section of sections) {
+    await loadSection(section);
+    // Add small delay between requests
+    await new Promise(resolve => setTimeout(resolve, 800));
+  }
 }
 
 async function loadSection({ id, query, limit }) {
