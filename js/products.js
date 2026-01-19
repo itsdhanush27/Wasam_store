@@ -30,6 +30,7 @@ async function initHomepage() {
     { id: 'latestProducts', query: 'trending amazon finds', limit: 8 }, // 8 for latest
     { id: 'electronicsProducts', query: 'best electronics gadgets', limit: 4 },
     { id: 'homeProducts', query: 'home kitchen essentials', limit: 4 },
+    { id: 'fashionProducts', query: 'latest fashion trends clothing', limit: 4 },
     { id: 'beautyProducts', query: 'trending beauty personal care', limit: 4 },
     { id: 'healthProducts', query: 'health household best sellers', limit: 4 }
   ];
