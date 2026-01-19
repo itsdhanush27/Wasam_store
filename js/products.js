@@ -5,149 +5,164 @@ let allProducts = [];
 
 // Initialize products
 async function initProducts() {
+  const path = window.location.pathname;
+  const params = new URLSearchParams(window.location.search);
+
+  // Check if we are on the homepage (no search params, basic path)
+  const isHomepage = (path === '/' || path.endsWith('index.html')) && !params.toString();
+
+  if (isHomepage) {
+    await initHomepage();
+  } else {
+    await initProductPage();
+  }
+
+  // Common initialization
+  initFilter(params.get('category'));
+
+  // Dispatch event to signal products are loaded
+  window.dispatchEvent(new CustomEvent('productsLoaded'));
+}
+
+// Homepage Initialization: Load specific sections
+async function initHomepage() {
+  const sections = [
+    { id: 'latestProducts', query: 'trending amazon finds', limit: 8 }, // 8 for latest
+    { id: 'electronicsProducts', query: 'best electronics gadgets', limit: 4 },
+    { id: 'homeProducts', query: 'home kitchen essentials', limit: 4 },
+    { id: 'beautyProducts', query: 'trending beauty personal care', limit: 4 },
+    { id: 'healthProducts', query: 'health household best sellers', limit: 4 }
+  ];
+
+  // Fetch sections in parallel
+  await Promise.all(sections.map(section => loadSection(section)));
+}
+
+async function loadSection({ id, query, limit }) {
+  const container = document.getElementById(id);
+  if (!container) return;
+
+  container.innerHTML = '<div class="loading-spinner">Loading...</div>';
+
   try {
-    // Determine API query based on URL parameters
+    const products = await fetchProductsFromApi(query);
+    if (!products || products.length === 0) {
+      throw new Error('No products found');
+    }
+
+    // Tag them for specific sections if needed, or just render
+    const displayProducts = products.slice(0, limit);
+    container.innerHTML = displayProducts.map(product => createProductCard(product)).join('');
+  } catch (error) {
+    console.error(`Error loading section ${id}:`, error);
+    // Silent fallback to generic data if API fails individual section
+    container.innerHTML = '<p class="error-msg">Check back soon for new products!</p>';
+  }
+}
+
+// Product Page Initialization
+async function initProductPage() {
+  try {
     const params = new URLSearchParams(window.location.search);
     const categoryParam = params.get('category');
     const searchParam = params.get('search');
+    let apiQuery = 'bestselling products';
 
-    let apiQuery = 'bestselling products'; // Default for homepage
-
-    // If on products.html with params, customize the query
-    // If on products.html (or extensionless /products), customize the query
-    // We can detecting this by checking if we are not on the home page or detail page, 
-    // or simply reuse the container check logic (but container isn't grabbed yet).
-    // Let's use a broader path check.
-    if (window.location.pathname.match(/products(\.html)?$/)) {
-      if (searchParam) {
-        apiQuery = searchParam;
-        updatePageHeader(`Search Results for "${searchParam}"`);
-      } else if (categoryParam) {
-        apiQuery = `bestselling ${categoryParam}`;
-        updatePageHeader(`${categoryParam}`);
-      } else {
-        apiQuery = 'bestselling products';
-        updatePageHeader('All Products');
-      }
+    if (searchParam) {
+      apiQuery = searchParam;
+      updatePageHeader(`Search Results for "${searchParam}"`);
+    } else if (categoryParam) {
+      apiQuery = `bestselling ${categoryParam}`;
+      updatePageHeader(`${categoryParam}`);
     } else {
-      // Just homepage defaults
-      apiQuery = 'bestselling tech gadgets';
+      updatePageHeader('All Products');
     }
 
-    // Initialize Filter Dropdown
-    const filterSelect = document.getElementById('categoryFilter');
-    if (filterSelect) {
-      // Set current value
-      if (categoryParam) {
-        filterSelect.value = categoryParam;
-      } else {
-        filterSelect.value = 'all';
-      }
-
-      // Add change listener
-      filterSelect.addEventListener('change', function () {
-        const selectedCategory = this.value;
-        if (selectedCategory === 'all') {
-          window.location.href = 'products.html';
-        } else {
-          window.location.href = `products.html?category=${encodeURIComponent(selectedCategory)}`;
-        }
-      });
-    }
+    // Initialize Filter Dropdown Logic
+    initFilter(categoryParam);
 
     console.log(`Fetching API with query: ${apiQuery}`);
-    // Use relative path for production compatibility
-    const response = await fetch(`/api/search?query=${encodeURIComponent(apiQuery)}`);
+    allProducts = await fetchProductsFromApi(apiQuery);
+
+    // Render
+    const allProductsContainer = document.getElementById('allProducts');
+    if (allProductsContainer) {
+      loadAllProducts('all');
+    }
+
+    // Sidebar logic
+    if (document.getElementById('sidebarProducts')) {
+      loadSidebarProducts();
+    }
+
+  } catch (error) {
+    console.error('Error loading products page:', error);
+    // Fallback load
+    fallbackLoad();
+  }
+}
+
+// Valid categories helper
+function assignCategory(query, item) {
+  // Simple heuristic to assign sensible category strings based on query or item title
+  if (query.includes('electronics') || item.product_title.toLowerCase().includes('phone') || item.product_title.toLowerCase().includes('audio')) return 'Electronics';
+  if (query.includes('home') || item.product_title.toLowerCase().includes('kitchen')) return 'Home';
+  if (query.includes('beauty')) return 'Beauty';
+  if (query.includes('health')) return 'Health';
+  if (query.includes('fashion')) return 'Fashion';
+  return 'General';
+}
+
+// Core Fetch Function
+async function fetchProductsFromApi(query) {
+  // Use relative path for production compatibility
+  try {
+    const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
     const data = await response.json();
 
     if (data.data && data.data.products) {
-      allProducts = data.data.products.map(item => ({
+      return data.data.products.map(item => ({
         id: item.asin,
         title: item.product_title,
         price: parseFloat(item.product_price ? item.product_price.replace('$', '').replace(',', '') : 0),
-        // assign category to searched category if available, else generic
-        category: categoryParam || 'General',
+        category: assignCategory(query, item),
         subcategory: 'Deals',
         image: item.product_photo,
-        badge: item.product_badge || (item.is_best_seller ? 'Best Seller' : ''),
+        badge: item.is_best_seller ? 'Best Seller' : (item.is_amazon_choice ? 'Choice' : ''),
         amazon_url: item.product_url,
         description: '',
         rating: item.product_star_rating,
         reviews: item.product_num_ratings
       }));
-    } else {
-      console.warn('API returned unexpected structure, falling back to static data.');
-      // Fallback logic remains...
-      const staticResponse = await fetch('data/products.json');
-      const staticData = await staticResponse.json();
-      allProducts = staticData.products;
     }
+    return [];
+  } catch (e) {
+    console.error("Fetch API error", e);
+    return [];
+  }
+}
 
-    // Render Logic
-    // Render Logic
-    const allProductsContainer = document.getElementById('allProducts');
-    if (allProductsContainer) {
-      // On products page (has #allProducts container), show everything
-      loadAllProducts('all');
-    } else {
-      // On homepage, try to populate sections
-      // Since we only made ONE query (e.g. tech), most other sections might be empty
-      // unless we multi-fetch. For now, let's just populate Latest.
-      loadLatestProducts();
+function initFilter(categoryParam) {
+  const filterSelect = document.getElementById('categoryFilter');
+  if (filterSelect) {
+    if (categoryParam) filterSelect.value = categoryParam;
+    else filterSelect.value = 'all';
 
-      // Optional: If we want to populate other sections on homepage, we need more API calls or a mix.
-      // For now, let's clear them or show duplicates to avoid broken feel?
-      // Let's just try to load generic 'General' items into sections if they fit broad types,
-      // but strictly our map set category='General'.
-      // So loadCategoryProducts('Electronics'...) will find 0 items.
-      // We will leave as is for now, focus on functional category pages.
-    }
-
-    // Load sidebar products if on products page
-    if (document.getElementById('sidebarProducts')) {
-      loadSidebarProducts();
-    }
-
-    // Dispatch event to signal products are loaded
-    window.dispatchEvent(new CustomEvent('productsLoaded'));
-
-  } catch (error) {
-    console.error('Error loading products:', error);
-    // Silent fallback...
-    try {
-      const response = await fetch('data/products.json');
-      const data = await response.json();
-      allProducts = data.products;
-      window.dispatchEvent(new CustomEvent('productsLoaded'));
-      if (document.getElementById('allProducts')) loadAllProducts('all');
-      else loadLatestProducts();
-    } catch (e) { console.error('Fallback failed'); }
+    filterSelect.addEventListener('change', function () {
+      const selectedCategory = this.value;
+      if (selectedCategory === 'all') {
+        window.location.href = 'products.html';
+      } else {
+        window.location.href = `products.html?category=${encodeURIComponent(selectedCategory)}`;
+      }
+    });
   }
 }
 
 // Helper to update header on products.html
 function updatePageHeader(title) {
   const titleEl = document.querySelector('.section-title');
-  const breadcrumbEl = document.querySelector('.breadcrumb-current'); // if exists
   if (titleEl) titleEl.textContent = title;
-}
-
-// Load latest products (products with "Latest" badge)
-function loadLatestProducts() {
-  const container = document.getElementById('latestProducts');
-  if (!container) return;
-
-  const latestProducts = allProducts.filter(p => p.badge === 'Latest').slice(0, 8);
-  container.innerHTML = latestProducts.map(product => createProductCard(product)).join('');
-}
-
-// Load products by category
-function loadCategoryProducts(category, containerId, limit = 4) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-
-  const categoryProducts = allProducts.filter(p => p.category === category).slice(0, limit);
-  container.innerHTML = categoryProducts.map(product => createProductCard(product)).join('');
 }
 
 // Load all products for products page
@@ -173,9 +188,16 @@ function loadAllProducts(category = 'all') {
 function loadSidebarProducts() {
   const container = document.getElementById('sidebarProducts');
   if (!container) return;
-
+  // Just take first 5 of whatever we have
   const sidebarProducts = allProducts.slice(0, 5);
   container.innerHTML = sidebarProducts.map(product => createSidebarProduct(product)).join('');
+}
+
+// Fallback logic for errors
+async function fallbackLoad() {
+  // ... existing fallback or simplified
+  const container = document.getElementById('allProducts');
+  if (container) container.innerHTML = '<p>Could not load products. Please try again later.</p>';
 }
 
 // Create product card HTML
@@ -214,28 +236,23 @@ function createSidebarProduct(product) {
 // Search products
 function searchProducts(query) {
   const searchQuery = query.toLowerCase().trim();
-
-  if (!searchQuery) {
-    return allProducts;
-  }
+  if (!searchQuery) return allProducts;
 
   return allProducts.filter(product =>
     product.title.toLowerCase().includes(searchQuery) ||
-    product.category.toLowerCase().includes(searchQuery) ||
-    (product.subcategory && product.subcategory.toLowerCase().includes(searchQuery))
+    product.category.toLowerCase().includes(searchQuery)
   );
 }
 
-// Get product by ID
+// Get product by ID (Assumes allProducts is populated, likely won't work perfectly on Homepage unless we fetch there too)
+// Note: Product details page should handle its own fetching if id not found in memory.
 function getProductById(id) {
-  return allProducts.find(product => product.id === id); // id is now string (ASIN)
+  return allProducts.find(product => product.id === id);
 }
 
 // Filter products by category
 function filterByCategory(category) {
-  if (category === 'all') {
-    return allProducts;
-  }
+  if (category === 'all') return allProducts;
   return allProducts.filter(p => p.category === category);
 }
 
