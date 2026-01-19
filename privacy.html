@@ -26,12 +26,7 @@
                 </div>
             </a>
 
-            <!-- Mobile Menu Button -->
-            <button class="mobile-menu-btn" aria-label="Toggle Menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+            <!-- Search Bar -->
             <div class="search-container">
                 <div class="search-bar">
                     <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off">
@@ -44,11 +39,126 @@
                     </button>
                 </div>
             </div>
-            <div class="header-actions">
-                <a href="contact.html" class="btn btn-primary">Join Our Team</a>
+
+            <div class="header-actions desktop-only">
+                <button class="globe-btn" id="globeBtn" aria-label="Select Country">
+                    <span id="currentCountryDisplay">🌎</span>
+                    <div class="country-dropdown" id="countryDropdown"></div>
+                </button>
+                <a href="contact.html" class="btn btn-primary"><span>Join Our Team</span></a>
                 <a href="login.html" class="btn btn-outline"><span>Login</span></a>
             </div>
+
+            <!-- Mobile Menu Button (Right Corner) -->
+            <button class="mobile-menu-btn" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="nav-container">
+                <!-- Mobile Actions (Inside Menu) -->
+                <div class="mobile-nav-actions mobile-only">
+                    <div
+                        style="display: flex; gap: 10px; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 20px;">
+                        <button class="globe-btn" id="mobileGlobeBtn" aria-label="Select Country">
+                            <span id="mobileCurrentCountryDisplay">🌎</span>
+                            <div class="country-dropdown" id="mobileCountryDropdown"></div>
+                        </button>
+                        <div style="display: flex; gap: 10px;">
+                            <a href="login.html" class="btn btn-outline" style="padding: 8px 12px; font-size: 14px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                                    <polyline points="10 17 15 12 10 7" />
+                                    <line x1="15" y1="12" x2="3" y2="12" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <a href="contact.html" class="btn btn-primary"
+                        style="width: 100%; justify-content: center; margin-bottom: 20px;">
+                        <span>Join Our Team</span>
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <a href="products.html?category=Electronics" class="nav-link">
+                        Electronics & Gadgets
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=audio%20wearables">Audio & Wearables</a>
+                        <a href="products.html?search=cameras%20gaming">Cameras & Gaming</a>
+                        <a href="products.html?search=computers%20laptops">Computers & Laptops</a>
+                        <a href="products.html?search=mobile%20accessories">Mobiles & Accessories</a>
+                        <a href="products.html?search=smart%20home">Smart Home</a>
+                    </div>
+                </div>
+
+                <div class="nav-item">
+                    <a href="products.html?category=Home" class="nav-link">
+                        Home, Kitchen & Living
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=kitchen%20appliances">Kitchen Appliances</a>
+                        <a href="products.html?search=home%20decor">Home Decor</a>
+                        <a href="products.html?search=bedding%20bath">Bedding & Bath</a>
+                        <a href="products.html?search=furniture">Furniture</a>
+                    </div>
+                </div>
+
+                <div class="nav-item">
+                    <a href="products.html?category=Fashion" class="nav-link">
+                        Fashion & Lifestyle
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=mens%20fashion">Men's Fashion</a>
+                        <a href="products.html?search=womens%20fashion">Women's Fashion</a>
+                        <a href="products.html?search=fashion%20accessories">Accessories</a>
+                    </div>
+                </div>
+
+                <div class="nav-item">
+                    <a href="products.html?category=Beauty" class="nav-link">
+                        Beauty & Personal Care
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=skincare">Skincare</a>
+                        <a href="products.html?search=haircare">Haircare</a>
+                        <a href="products.html?search=makeup">Makeup</a>
+                        <a href="products.html?search=fragrances">Fragrances</a>
+                    </div>
+                </div>
+                <div class="nav-item">
+                    <a href="products.html?category=Health" class="nav-link">
+                        Health & Wellness
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="products.html?search=vitamins">Vitamins & Supplements</a>
+                        <a href="products.html?search=medical%20supplies">Medical Supplies</a>
+                        <a href="products.html?search=fitness%20equipment">Fitness Equipment</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
     </header>
 
     <!-- Content -->
