@@ -166,11 +166,39 @@
             const params = new URLSearchParams(window.location.search);
             const productId = params.get('id');
 
+            function fetchRelatedProducts(product) {
+                const query = product.title.split(' ').slice(0, 3).join(' '); // Use first 3 words
+                fetch(`/api/search?query=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.data && data.data.products && data.data.products.length > 0) {
+                            const related = data.data.products
+                                .filter(p => p.asin !== product.id) // Exclude current
+                                .slice(0, 4)
+                                .map(item => ({
+                                    id: item.asin,
+                                    title: item.product_title,
+                                    price: parseFloat(item.product_price ? item.product_price.replace('$', '').replace(',', '') : 0),
+                                    category: 'Related',
+                                    image: item.product_photo,
+                                    badge: item.product_badge
+                                }));
+
+                            if (related.length > 0) {
+                                document.getElementById('relatedProducts').innerHTML = related.map(p => createProductCard(p)).join('');
+                            } else {
+                                document.getElementById('relatedProducts').innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No related products found.</p>';
+                            }
+                        }
+                    })
+                    .catch(err => console.error('Related fetch error:', err));
+            }
+
             function renderFetchedProduct(product) {
                 // Update page content
                 document.title = `${product.title} | Wasam.store`;
                 document.getElementById('productTitle').textContent = product.title;
-                document.getElementById('productPrice').textContent = product.price ? `$${parseFloat(product.price.replace('$', '')).toFixed(2)}` : 'Check Price';
+                document.getElementById('productPrice').textContent = product.price ? `$${parseFloat(String(product.price).replace('$', '')).toFixed(2)}` : 'Check Price';
                 document.getElementById('productCategory').textContent = product.subcategory || product.category || 'Details';
                 document.getElementById('productImage').src = product.image;
                 document.getElementById('productImage').alt = product.title;
@@ -192,6 +220,9 @@
                     </svg>
                     Check Price on Amazon`;
                 amazonLink.style.display = 'inline-flex';
+
+                // Fetch related items dynamically
+                fetchRelatedProducts(product);
             }
 
             function fetchAndRender() {
