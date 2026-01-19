@@ -1,108 +1,118 @@
 const express = require('express');
 const cors = require('cors');
-// axios is no longer needed for main logic but check if you want to keep it.
-// We will simply require amazon-buddy.
-const amazonBuddy = require('amazon-buddy');
+const axios = require('axios');
+const cheerio = require('cheerio');
 const path = require('path');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS and serve static files
 app.use(cors());
 app.use(express.static(path.join(__dirname), { extensions: ['html'] }));
 app.use(express.json());
 
-// Search Endpoint using amazon-buddy
+// Helper: Custom Scraper Headers
+const SCRAPER_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5'
+};
+
+// Helper: safe fetch
+async function fetchAmazonPage(url) {
+    try {
+        const response = await axios.get(url, { headers: SCRAPER_HEADERS, timeout: 8000 }); // 8s timeout for Vercel safety
+        return response.data;
+    } catch (error) {
+        console.error('Scrape fetch error:', error.message);
+        return null; // Return null to handle gracefully
+    }
+}
+
+// Search Endpoint
 app.get('/api/search', async (req, res) => {
     const { query } = req.query;
-
     console.log(`[Scraper] Searching for: ${query}`);
 
-    if (!query) {
-        return res.status(400).json({ error: 'Query parameter is required' });
+    if (!query) return res.status(400).json({ error: 'Missing query' });
+
+    const searchUrl = `https://www.amazon.com/s?k=${encodeURIComponent(query)}`;
+    const html = await fetchAmazonPage(searchUrl);
+
+    if (!html) {
+        return res.status(500).json({ error: 'Failed to fetch Amazon page' });
     }
 
-    try {
-        // Fetch products using amazon-buddy
-        // Limit to 40 items to prevent Vercel timeouts (10s limit)
-        const results = await amazonBuddy.products({ 
-            keyword: query, 
-            number: 40, 
-            country: 'US' 
-        });
+    if (html.includes('api-services-support@amazon.com')) {
+        console.error('CAPTCHA detected');
+        return res.status(503).json({ error: 'Amazon blocked request (CAPTCHA)' });
+    }
 
-        if (!results || !results.result || results.result.length === 0) {
-            console.log('[Scraper] No results found.');
-            return res.json({ data: { products: [] } });
+    const $ = cheerio.load(html);
+    const products = [];
+
+    $('.s-result-item[data-asin]').each((i, el) => {
+        const asin = $(el).attr('data-asin');
+        if (!asin) return;
+
+        // robust selectors
+        const title = $(el).find('h2 span').text().trim() || $(el).find('.a-text-normal').first().text().trim();
+        const priceWhole = $(el).find('.a-price-whole').first().text().trim();
+        const priceFraction = $(el).find('.a-price-fraction').first().text().trim();
+        const price = priceWhole ? `$${priceWhole}.${priceFraction}` : null;
+        const image = $(el).find('.s-image').attr('src');
+        let link = $(el).find('a.a-link-normal').first().attr('href');
+
+        if (link && !link.startsWith('http')) {
+            link = 'https://www.amazon.com' + link;
         }
 
-        console.log(`[Scraper] Found ${results.result.length} products.`);
+        if (title && image) {
+            products.push({
+                asin,
+                product_title: title,
+                product_price: price || '$0.00',
+                product_photo: image,
+                product_url: link,
+                product_star_rating: 'N/A', // scraping stars is harder (class names vary)
+                product_num_ratings: 0
+            });
+        }
+    });
 
-        // Map amazon-buddy structure to our frontend's expected format (RapidAPI style)
-        const mappedProducts = results.result.map(item => ({
-            asin: item.asin,
-            product_title: item.title,
-            product_price: item.price && item.price.current_price ? `$${item.price.current_price}` : '$0.00',
-            product_photo: item.thumbnail,
-            product_star_rating: item.score,
-            product_num_ratings: item.reviews,
-            product_url: item.url,
-            is_best_seller: false // scraper might not return this, default false
-            // badge: not always available
-        }));
-
-        res.json({
-            data: {
-                products: mappedProducts
-            }
-        });
-
-    } catch (error) {
-        console.error('[Scraper] Error:', error.message);
-        res.status(500).json({
-            error: 'Failed to scrape data',
-            details: error.message
-        });
-    }
+    console.log(`[Scraper] Found ${products.length} items`);
+    res.json({ data: { products: products.slice(0, 40) } });
 });
 
-// Product Details Endpoint using amazon-buddy
+// Product Details Endpoint (Basic)
 app.get('/api/product', async (req, res) => {
     const { asin } = req.query;
+    if (!asin) return res.status(400).json({ error: 'Missing ASIN' });
 
-    if (!asin) {
-        return res.status(400).json({ error: 'ASIN parameter is required' });
-    }
+    console.log(`[Scraper] Fetching product: ${asin}`);
+    const productUrl = `https://www.amazon.com/dp/${asin}`;
+    const html = await fetchAmazonPage(productUrl);
 
-    try {
-        console.log(`[Scraper] Fetching details for ASIN: ${asin}`);
-        const details = await amazonBuddy.asin({ asin: asin, country: 'US' });
+    if (!html) return res.status(500).json({ error: 'Failed to fetch product' });
 
-        if (!details || !details.result || details.result.length === 0) {
-             return res.status(404).json({ error: 'Product not found' });
+    const $ = cheerio.load(html);
+
+    // Basic Parsing
+    const title = $('#productTitle').text().trim();
+    const price = $('.a-price .a-offscreen').first().text().trim();
+    const description = $('#feature-bullets ul').html() || ''; // Get HTML of bullets
+    const image = $('#landingImage').attr('src');
+
+    res.json({
+        data: {
+            product_title: title,
+            product_price: price,
+            product_photo: image,
+            product_description: description,
+            about_product: []
         }
-
-        const product = details.result[0];
-
-        // Map to expected format
-        res.json({
-            data: {
-                product_title: product.title,
-                product_price: product.price ? product.price.current_price : '',
-                product_photo: product.main_image,
-                product_description: product.description,
-                about_product: product.features, // amazon-buddy often calls bullet points 'features'
-                product_star_rating: product.score,
-                product_num_ratings: product.reviews
-            }
-        });
-
-    } catch (error) {
-        console.error('[Scraper] Detail Error:', error.message);
-        res.status(500).json({ error: 'Failed to fetch product details' });
-    }
+    });
 });
 
 // Serve index.html for root
@@ -110,13 +120,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Export the app for Vercel
 module.exports = app;
 
-// Only listen if not running in production/serverless environment
 if (require.main === module) {
     app.listen(PORT, () => {
-        console.log(`Server running at http://localhost:${PORT}`);
-        console.log(`Using amazon-buddy scraper logic.`);
+        console.log(`Server running on http://localhost:${PORT}`);
     });
 }
