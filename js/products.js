@@ -122,6 +122,43 @@ function assignCategory(query, item) {
 async function fetchProductsFromApi(query) {
   // Use relative path for production compatibility
   try {
+    // Try fetching from DB cache first
+    try {
+      if (query.includes('trending') || query.includes('best')) {
+        // Mapping queries to DB Categories (Simple heuristic)
+        let dbCategory = 'General';
+        if (query.includes('electronics')) dbCategory = 'Electronics';
+        else if (query.includes('home')) dbCategory = 'Home';
+        else if (query.includes('fashion')) dbCategory = 'Fashion';
+        else if (query.includes('beauty')) dbCategory = 'Beauty';
+        else if (query.includes('health')) dbCategory = 'Health';
+        else if (query.includes('trending amazon finds')) dbCategory = 'Latest';
+
+        const dbRes = await fetch(`/api/top-products?category=${dbCategory}&limit=10`);
+        const dbData = await dbRes.json();
+
+        if (dbData.data && dbData.data.products && dbData.data.products.length > 0) {
+          console.log(`[Frontend] Loaded ${dbCategory} from DB Cache`);
+          return dbData.data.products.map(item => ({
+            id: item.asin,
+            title: item.product_title,
+            price: parseFloat(item.product_price ? item.product_price.replace(/[^0-9.]/g, '') : 0),
+            category: item.category || 'General',
+            subcategory: 'Deals',
+            image: item.product_photo,
+            badge: item.is_best_seller ? 'Best Seller' : '',
+            amazon_url: item.product_url,
+            description: '',
+            rating: '4.5',
+            reviews: 0
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('DB Cache miss, falling back to live search', err);
+    }
+
+    // Fallback to Live Search API
     const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`);
     const data = await response.json();
 

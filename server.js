@@ -3,10 +3,22 @@ const cors = require('cors');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const path = require('path');
+const cron = require('node-cron');
+const connectDB = require('./config/db');
+const Product = require('./models/Product');
+const { runDailyScrape } = require('./services/scraper');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Connect Database
+connectDB();
+
+// Init Cron Job (Runs every day at midnight)
+cron.schedule('0 0 * * *', () => {
+    runDailyScrape();
+});
 
 app.use(cors());
 app.use(express.static(path.join(__dirname), { extensions: ['html'] }));
@@ -53,6 +65,50 @@ async function fetchAmazonPage(url) {
 // Search Endpoint
 // Helper: Load static products
 const staticProductsData = require('./data/products.json');
+
+// --- NEW API ENDPOINTS ---
+
+// Get Cached Products (Primary Endpoint)
+app.get('/api/top-products', async (req, res) => {
+    const { category, limit } = req.query;
+    try {
+        let query = {};
+        if (category && category !== 'all') {
+            query.category = category;
+        }
+
+        const products = await Product.find(query)
+            .sort({ lastScraped: -1 })
+            .limit(parseInt(limit) || 20);
+
+        if (products.length > 0) {
+            const formatted = products.map(p => ({
+                asin: p.asin,
+                product_title: p.title,
+                product_price: p.price,
+                product_photo: p.image,
+                product_url: p.url,
+                category: p.category,
+                is_best_seller: p.isBestSeller
+            }));
+            return res.json({ data: { products: formatted, source: 'database' } });
+        }
+
+        return res.json({ data: { products: [], source: 'empty_db' } });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server Error' });
+    }
+});
+
+// Manual Trigger for Scraper (Useful for testing)
+app.get('/api/trigger-scrape', async (req, res) => {
+    runDailyScrape();
+    res.json({ message: 'Scraper started in background' });
+});
+
+// --- LEGACY ENDPOINTS (Backup) ---
 
 // Search Endpoint
 app.get('/api/search', async (req, res) => {
