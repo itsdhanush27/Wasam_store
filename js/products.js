@@ -270,6 +270,10 @@ function createProductCard(product) {
 
 // Create sidebar product HTML
 function createSidebarProduct(product) {
+  const priceDisplay = (product.price !== null && product.price !== undefined && !isNaN(product.price))
+    ? '$' + Number(product.price).toFixed(2)
+    : 'Check Price';
+
   return `
     <a href="product.html?id=${product.id}" class="sidebar-product">
       <div class="sidebar-product-image">
@@ -277,7 +281,7 @@ function createSidebarProduct(product) {
       </div>
       <div class="sidebar-product-info">
         <h4 class="sidebar-product-title">${product.title}</h4>
-        <p class="sidebar-product-price">$${product.price.toFixed(2)}</p>
+        <p class="sidebar-product-price">${priceDisplay}</p>
       </div>
     </a>
   `;
