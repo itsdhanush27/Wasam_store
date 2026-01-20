@@ -4,6 +4,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const path = require('path');
 const cron = require('node-cron');
+const mongoose = require('mongoose');
 const connectDB = require('./config/db');
 const Product = require('./models/Product');
 const { runDailyScrape } = require('./services/scraper');
@@ -15,8 +16,23 @@ const PORT = process.env.PORT || 3000;
 // Connect Database
 connectDB();
 
-// Init Cron Job (Runs every day at midnight)
-cron.schedule('0 0 * * *', () => {
+// Monitor Connection for Initial Scrape
+mongoose.connection.once('connected', async () => {
+    try {
+        const count = await Product.countDocuments();
+        console.log(`[Server] Database has ${count} products.`);
+
+        if (count === 0) {
+            console.log('[Server] Database is empty. Starting initial scrape to populate data...');
+            runDailyScrape();
+        }
+    } catch (err) {
+        console.error('[Server] Failed to check product count:', err);
+    }
+});
+
+// Init Cron Job (Runs daily at 10:05 AM)
+cron.schedule('5 10 * * *', () => {
     runDailyScrape();
 });
 
@@ -83,6 +99,12 @@ const staticProductsData = require('./data/products.json');
 app.get('/api/top-products', async (req, res) => {
     const { category, limit } = req.query;
     try {
+        // Fast-fail if DB is not connected
+        if (mongoose.connection.readyState !== 1) {
+            console.warn('[API] MongoDB not connected. Skipping DB query.');
+            return res.json({ data: { products: [], source: 'offline_fallback' } });
+        }
+
         let query = {};
         if (category && category !== 'all') {
             query.category = category;
@@ -146,9 +168,20 @@ app.get('/api/search', async (req, res) => {
 
         // robust selectors
         const title = $(el).find('h2 span').text().trim() || $(el).find('.a-text-normal').first().text().trim();
-        const priceWhole = $(el).find('.a-price-whole').first().text().trim();
-        const priceFraction = $(el).find('.a-price-fraction').first().text().trim();
-        const price = priceWhole ? `$${priceWhole}.${priceFraction}` : null;
+
+        let priceRaw = $(el).find('.a-price .a-offscreen').first().text().trim();
+        if (!priceRaw) {
+            const priceWhole = $(el).find('.a-price-whole').first().text().trim();
+            const priceFraction = $(el).find('.a-price-fraction').first().text().trim();
+            if (priceWhole) priceRaw = `${priceWhole}.${priceFraction}`;
+        }
+
+        // Parse float
+        let price = 0; // Default for legacy API view
+        if (priceRaw) {
+            price = parseFloat(priceRaw.replace(/[^\d.]/g, '')) || 0;
+        }
+
         const image = $(el).find('.s-image').attr('src');
         let link = $(el).find('a.a-link-normal').first().attr('href');
 
@@ -160,7 +193,7 @@ app.get('/api/search', async (req, res) => {
             products.push({
                 asin,
                 product_title: title,
-                product_price: price || '$0.00',
+                product_price: price || null,
                 product_photo: image,
                 product_url: link,
                 product_star_rating: 'N/A',
@@ -212,7 +245,10 @@ app.get('/api/product', async (req, res) => {
     // Basic Parsing
     const title = $('#productTitle').text().trim();
     const price = $('.a-price .a-offscreen').first().text().trim();
-    const description = $('#feature-bullets ul').html() || ''; // Get HTML of bullets
+    const description = $('#feature-bullets ul').html() ||
+        $('#productDescription').html() ||
+        $('meta[name="description"]').attr('content') ||
+        'No description available.';
     const image = $('#landingImage').attr('src');
 
     res.json({

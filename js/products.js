@@ -124,7 +124,8 @@ async function fetchProductsFromApi(query) {
   try {
     // Try fetching from DB cache first
     try {
-      if (query.includes('trending') || query.includes('best')) {
+      // Try fetching from DB cache first
+      try {
         // Mapping queries to DB Categories (Simple heuristic)
         let dbCategory = 'General';
         if (query.includes('electronics')) dbCategory = 'Electronics';
@@ -134,25 +135,30 @@ async function fetchProductsFromApi(query) {
         else if (query.includes('health')) dbCategory = 'Health';
         else if (query.includes('trending amazon finds')) dbCategory = 'Latest';
 
-        const dbRes = await fetch(`/api/top-products?category=${dbCategory}&limit=10`);
-        const dbData = await dbRes.json();
+        // Always check DB for mapped categories
+        if (dbCategory !== 'General' || query.includes('trending') || query.includes('best')) {
+          const dbRes = await fetch(`/api/top-products?category=${dbCategory}&limit=10`);
+          const dbData = await dbRes.json();
 
-        if (dbData.data && dbData.data.products && dbData.data.products.length > 0) {
-          console.log(`[Frontend] Loaded ${dbCategory} from DB Cache`);
-          return dbData.data.products.map(item => ({
-            id: item.asin,
-            title: item.product_title,
-            price: parseFloat(item.product_price ? item.product_price.replace(/[^0-9.]/g, '') : 0),
-            category: item.category || 'General',
-            subcategory: 'Deals',
-            image: item.product_photo,
-            badge: item.is_best_seller ? 'Best Seller' : '',
-            amazon_url: item.product_url,
-            description: '',
-            rating: '4.5',
-            reviews: 0
-          }));
+          if (dbData.data && dbData.data.products && dbData.data.products.length > 0) {
+            console.log(`[Frontend] Loaded ${dbCategory} from DB Cache`);
+            return dbData.data.products.map(item => ({
+              id: item.asin,
+              title: item.product_title,
+              price: typeof item.product_price === 'number' ? item.product_price : null,
+              category: item.category || 'General',
+              subcategory: 'Deals',
+              image: item.product_photo,
+              badge: item.is_best_seller ? 'Best Seller' : '',
+              amazon_url: item.product_url,
+              description: '',
+              rating: '4.5',
+              reviews: 0
+            }));
+          }
         }
+      } catch (err) {
+        console.warn('DB Cache miss, falling back to live search', err);
       }
     } catch (err) {
       console.warn('DB Cache miss, falling back to live search', err);
@@ -166,7 +172,8 @@ async function fetchProductsFromApi(query) {
       return data.data.products.map(item => ({
         id: item.asin,
         title: item.product_title,
-        price: parseFloat(item.product_price ? item.product_price.replace('$', '').replace(',', '') : 0),
+        price: parseFloat(item.product_price ? item.product_price.replace(/[^0-9.]/g, '') : 0),
+        displayPrice: item.product_price || 'Check Price', // Fix $0.00
         category: assignCategory(query, item),
         subcategory: 'Deals',
         image: item.product_photo,
@@ -253,7 +260,7 @@ function createProductCard(product) {
       <div class="product-info">
         <span class="product-category">${product.subcategory || product.category}</span>
         <h3 class="product-title">${product.title}</h3>
-        <p class="product-price">$${product.price.toFixed(2)}</p>
+        <p class="product-price">${(product.price !== null && product.price !== undefined && !isNaN(product.price)) ? '$' + Number(product.price).toFixed(2) : 'Check Price'}</p>
         <button class="product-btn">See Details</button>
       </div>
     </a>

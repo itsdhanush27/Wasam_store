@@ -12,8 +12,8 @@ const ProductSchema = new mongoose.Schema({
         required: true
     },
     price: {
-        type: String, // Storing as string to preserve formatting like "$19.99"
-        default: 'Check Price'
+        type: Number, // Stored as number (e.g. 19.99)
+        default: null
     },
     image: {
         type: String,

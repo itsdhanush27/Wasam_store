@@ -51,9 +51,28 @@ const scrapeCategory = async (query, category, limit = 10) => {
         if (!asin) return;
 
         const title = $(el).find('h2 span').text().trim() || $(el).find('.a-text-normal').first().text().trim();
-        const priceWhole = $(el).find('.a-price-whole').first().text().trim();
-        const priceFraction = $(el).find('.a-price-fraction').first().text().trim();
-        const price = priceWhole ? `$${priceWhole}.${priceFraction}` : 'Check Price';
+
+        // Robust Price Parsing
+        let priceRaw = $(el).find('.a-price .a-offscreen').first().text().trim();
+        if (!priceRaw) {
+            const priceWhole = $(el).find('.a-price-whole').first().text().trim();
+            const priceFraction = $(el).find('.a-price-fraction').first().text().trim();
+            if (priceWhole) {
+                priceRaw = `${priceWhole}.${priceFraction || '00'}`;
+            }
+        }
+
+        let price = null;
+        if (priceRaw) {
+            // Remove non-numeric characters (currency, commas) and parse
+            const cleanPrice = priceRaw.replace(/[^\d.]/g, '');
+            price = parseFloat(cleanPrice);
+            if (isNaN(price)) price = null;
+        }
+
+        // Fallback for no price (e.g. out of stock or variety)
+        // if (!price) price = null; // Already null by default
+
         const image = $(el).find('.s-image').attr('src');
         let link = $(el).find('a.a-link-normal').first().attr('href');
 
