@@ -6,12 +6,30 @@ const path = require('path');
 // Configuration
 const OUTPUT_FILE = path.join(__dirname, '../data/products.csv');
 const CATEGORIES = [
-    { query: 'trending amazon finds', category: 'Latest', limit: 15 },
-    { query: 'best electronics gadgets', category: 'Electronics', limit: 15 },
-    { query: 'home kitchen essentials', category: 'Home', limit: 15 },
-    { query: 'latest fashion trends clothing', category: 'Fashion', limit: 15 },
-    { query: 'trending beauty personal care', category: 'Beauty', limit: 15 },
-    { query: 'health household best sellers', category: 'Health', limit: 15 }
+    // Electronics & Gadgets
+    { query: 'best selling smartphones', category: 'Electronics & Gadgets', limit: 10 },
+    { query: 'top rated laptops', category: 'Electronics & Gadgets', limit: 10 },
+    { query: 'wireless headphones and audio', category: 'Electronics & Gadgets', limit: 10 },
+
+    // Home, Kitchen & Living
+    { query: 'kitchen gadgets and tools', category: 'Home, Kitchen & Living', limit: 10 },
+    { query: 'modern home decor', category: 'Home, Kitchen & Living', limit: 10 },
+    { query: 'bedding and bath essentials', category: 'Home, Kitchen & Living', limit: 10 },
+
+    // Fashion & Lifestyle
+    { query: 'mens fashion trends', category: 'Fashion & Lifestyle', limit: 10 },
+    { query: 'womens fashion trends', category: 'Fashion & Lifestyle', limit: 10 },
+    { query: 'fashion accessories', category: 'Fashion & Lifestyle', limit: 10 },
+
+    // Beauty & Personal Care
+    { query: 'skincare products best sellers', category: 'Beauty & Personal Care', limit: 10 },
+    { query: 'makeup best sellers', category: 'Beauty & Personal Care', limit: 10 },
+    { query: 'hair care products', category: 'Beauty & Personal Care', limit: 10 },
+
+    // Health & Household
+    { query: 'household cleaning supplies', category: 'Health & Household', limit: 10 },
+    { query: 'wellness and vitamins', category: 'Health & Household', limit: 10 },
+    { query: 'personal health care', category: 'Health & Household', limit: 10 }
 ];
 
 // User-Agent Rotation
@@ -63,21 +81,21 @@ const scrapeCategory = async (query, category, limit) => {
         if (!asin) return;
 
         const title = $(el).find('h2 span').text().trim() || $(el).find('.a-text-normal').first().text().trim();
-        
+
         let priceRaw = $(el).find('.a-price .a-offscreen').first().text().trim();
         if (!priceRaw) {
-             const priceWhole = $(el).find('.a-price-whole').first().text().trim();
-             const priceFraction = $(el).find('.a-price-fraction').first().text().trim();
-             if (priceWhole) {
-                 priceRaw = `${priceWhole}.${priceFraction || '00'}`;
-             }
+            const priceWhole = $(el).find('.a-price-whole').first().text().trim();
+            const priceFraction = $(el).find('.a-price-fraction').first().text().trim();
+            if (priceWhole) {
+                priceRaw = `${priceWhole}.${priceFraction || '00'}`;
+            }
         }
 
-        let price = ''; 
+        let price = '';
         if (priceRaw) {
-             const cleanPrice = priceRaw.replace(/[^\d.]/g, '');
-             const p = parseFloat(cleanPrice);
-             if (!isNaN(p)) price = p;
+            const cleanPrice = priceRaw.replace(/[^\d.]/g, '');
+            const p = parseFloat(cleanPrice);
+            if (!isNaN(p)) price = p;
         }
 
         const image = $(el).find('.s-image').attr('src');
@@ -142,7 +160,7 @@ const generateCsv = async () => {
 
     // Ensure directory exists
     const dir = path.dirname(OUTPUT_FILE);
-    if (!fs.existsSync(dir)){
+    if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
 
