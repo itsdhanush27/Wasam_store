@@ -110,11 +110,11 @@ async function initProductPage() {
 // Valid categories helper
 function assignCategory(query, item) {
   // Simple heuristic to assign sensible category strings based on query or item title
-  if (query.includes('electronics') || item.product_title.toLowerCase().includes('phone') || item.product_title.toLowerCase().includes('audio')) return 'Electronics';
-  if (query.includes('home') || item.product_title.toLowerCase().includes('kitchen')) return 'Home';
-  if (query.includes('beauty')) return 'Beauty';
-  if (query.includes('health')) return 'Health';
-  if (query.includes('fashion')) return 'Fashion';
+  if (query.includes('electronics') || item.product_title.toLowerCase().includes('phone') || item.product_title.toLowerCase().includes('audio')) return 'Electronics & Gadgets';
+  if (query.includes('home') || item.product_title.toLowerCase().includes('kitchen')) return 'Home, Kitchen & Living';
+  if (query.includes('beauty')) return 'Beauty & Personal Care';
+  if (query.includes('health')) return 'Health & Household';
+  if (query.includes('fashion')) return 'Fashion & Lifestyle';
   return 'General';
 }
 
@@ -128,11 +128,11 @@ async function fetchProductsFromApi(query) {
       try {
         // Mapping queries to DB Categories (Simple heuristic)
         let dbCategory = 'General';
-        if (query.includes('electronics')) dbCategory = 'Electronics';
-        else if (query.includes('home')) dbCategory = 'Home';
-        else if (query.includes('fashion')) dbCategory = 'Fashion';
-        else if (query.includes('beauty')) dbCategory = 'Beauty';
-        else if (query.includes('health')) dbCategory = 'Health';
+        if (query.includes('electronics')) dbCategory = 'Electronics & Gadgets';
+        else if (query.includes('home')) dbCategory = 'Home, Kitchen & Living';
+        else if (query.includes('fashion')) dbCategory = 'Fashion & Lifestyle';
+        else if (query.includes('beauty')) dbCategory = 'Beauty & Personal Care';
+        else if (query.includes('health')) dbCategory = 'Health & Household';
         else if (query.includes('trending amazon finds')) dbCategory = 'Latest';
 
         // Always check DB for mapped categories
