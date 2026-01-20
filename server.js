@@ -99,6 +99,8 @@ const staticProductsData = require('./data/products.json');
 app.get('/api/top-products', async (req, res) => {
     const { category, limit } = req.query;
     try {
+        await connectDB(); // Ensure DB ready
+
         // Fast-fail if DB is not connected
         if (mongoose.connection.readyState !== 1) {
             console.warn('[API] MongoDB not connected. Skipping DB query.');
@@ -135,10 +137,10 @@ app.get('/api/top-products', async (req, res) => {
     }
 });
 
-// Manual Trigger for Scraper (Useful for testing & Vercel)
 app.get('/api/trigger-scrape', async (req, res) => {
     const { category } = req.query;
     try {
+        await connectDB(); // Ensure DB is connected before starting
         console.log('[API] Triggering scrape...');
         // Vercel serverless requires waiting for the task
         // We allow scraping a specific category to fit in timeout limits
