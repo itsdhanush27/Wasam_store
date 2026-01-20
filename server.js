@@ -1,344 +1,165 @@
 const express = require('express');
 const cors = require('cors');
-const axios = require('axios');
-const cheerio = require('cheerio');
 const path = require('path');
-const cron = require('node-cron');
-const mongoose = require('mongoose');
-const connectDB = require('./config/db');
-const Product = require('./models/Product');
-const { runDailyScrape } = require('./services/scraper');
+const fs = require('fs');
+
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Connect Database
-connectDB();
+// [MEMORY CACHE] Load products from CSV
+let PRODUCTS_CACHE = [];
 
-// Monitor Connection for Initial Scrape
-mongoose.connection.once('connected', async () => {
-    try {
-        const count = await Product.countDocuments();
-        console.log(`[Server] Database has ${count} products.`);
-
-        if (count === 0) {
-            console.log('[Server] Database is empty. Starting initial scrape to populate data...');
-            runDailyScrape();
-        }
-    } catch (err) {
-        console.error('[Server] Failed to check product count:', err);
+function loadCsvData() {
+    const csvPath = path.join(__dirname, 'data', 'products.csv');
+    if (!fs.existsSync(csvPath)) {
+        console.warn('[Server] No products.csv found. Please run "npm run scrape" locally.');
+        return;
     }
-});
 
-// Init Cron Job (Runs daily at 10:05 AM)
-cron.schedule('5 10 * * *', () => {
-    runDailyScrape();
-});
+    try {
+        const raw = fs.readFileSync(csvPath, 'utf8');
+        const lines = raw.split('\n').filter(l => l.trim() !== '');
+
+        // Simple CSV Parser (Handle quoted strings)
+        const parseRow = (row) => {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                if (char === '"') {
+                    if (inQuotes && row[i + 1] === '"') {
+                        current += '"';
+                        i++; // skip next quote
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result;
+        };
+
+        // Skip header (i=0 is header)
+        const products = [];
+        for (let i = 1; i < lines.length; i++) {
+            const cols = parseRow(lines[i]);
+            if (cols.length < 5) continue; // Invalid row
+
+            // csv header: asin,title,price,image,url,category,isBestSeller
+            products.push({
+                asin: cols[0],
+                title: cols[1],
+                price: cols[2] ? parseFloat(cols[2]) : null,
+                image: cols[3],
+                url: cols[4],
+                category: cols[5],
+                isBestSeller: cols[6] === 'true'
+            });
+        }
+
+        PRODUCTS_CACHE = products;
+        console.log(`[Server] Loaded ${PRODUCTS_CACHE.length} products from CSV.`);
+    } catch (e) {
+        console.error('[Server] Failed to load CSV:', e);
+    }
+}
+
+// Load data on start
+loadCsvData();
 
 app.use(cors());
 app.use(express.static(path.join(__dirname), { extensions: ['html'] }));
 app.use(express.json());
 
-// Global Error Handlers to prevent crash on DB fail
-process.on('uncaughtException', (err) => {
-    console.error('UNCAUGHT EXCEPTION:', err);
-    // Keep running
-});
-
-process.on('unhandledRejection', (err) => {
-    console.error('UNHANDLED REJECTION:', err);
-    // Keep running
-});
-
-// Helper: User-Agent Rotation
-const USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/120.0.6099.119 Mobile/15E148 Safari/604.1'
-];
-
-function getRandomHeaders() {
-    return {
-        'User-Agent': USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)],
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1',
-        'Pragma': 'no-cache',
-        'Cache-Control': 'no-cache'
-    };
-}
-
-// Helper: safe fetch
-async function fetchAmazonPage(url) {
-    try {
-        const headers = getRandomHeaders();
-        const response = await axios.get(url, { headers, timeout: 8000 }); // 8s timeout for Vercel safety
-        return response.data;
-    } catch (error) {
-        console.error('Scrape fetch error:', error.message);
-        return null; // Return null to handle gracefully
-    }
-}
-
-// Search Endpoint
-// Helper: Load static products
-const staticProductsData = require('./data/products.json');
-
-// --- NEW API ENDPOINTS ---
-
-// Get Cached Products (Primary Endpoint)
-app.get('/api/top-products', async (req, res) => {
+// Main API: Get Cached Products
+app.get('/api/top-products', (req, res) => {
     const { category, limit } = req.query;
-    try {
-        await connectDB(); // Ensure DB ready
 
-        // Fast-fail if DB is not connected
-        if (mongoose.connection.readyState !== 1) {
-            console.warn('[API] MongoDB not connected. Skipping DB query.');
-            return res.json({ data: { products: [], source: 'offline_fallback' } });
-        }
+    let results = PRODUCTS_CACHE;
 
-        let query = {};
-        if (category && category !== 'all') {
-            query.category = category;
-        }
-
-        const products = await Product.find(query)
-            .sort({ lastScraped: -1 })
-            .limit(parseInt(limit) || 20);
-
-        if (products.length > 0) {
-            const formatted = products.map(p => ({
-                asin: p.asin,
-                product_title: p.title,
-                product_price: p.price,
-                product_photo: p.image,
-                product_url: p.url,
-                category: p.category,
-                is_best_seller: p.isBestSeller
-            }));
-            return res.json({ data: { products: formatted, source: 'database' } });
-        }
-
-        return res.json({ data: { products: [], source: 'empty_db' } });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Server Error' });
+    if (category && category !== 'all') {
+        results = results.filter(p => p.category && p.category.toLowerCase() === category.toLowerCase());
     }
+
+    if (limit) {
+        results = results.slice(0, parseInt(limit));
+    }
+
+    if (results.length > 0) {
+        const formatted = results.map(p => ({
+            asin: p.asin,
+            product_title: p.title,
+            product_price: p.price,
+            product_photo: p.image,
+            product_url: p.url,
+            category: p.category,
+            is_best_seller: p.isBestSeller
+        }));
+        return res.json({ data: { products: formatted, source: 'csv' } });
+    }
+
+    return res.json({ data: { products: [], source: 'empty_csv' } });
 });
 
-app.get('/api/trigger-scrape', async (req, res) => {
-    const { category } = req.query;
-    try {
-        await connectDB(); // Ensure DB is connected before starting
-        console.log('[API] Triggering scrape...');
-        // Vercel serverless requires waiting for the task
-        // We allow scraping a specific category to fit in timeout limits
-        if (category) {
-            const sections = [
-                { query: 'trending amazon finds', category: 'Latest', limit: 8 },
-                { query: 'best electronics gadgets', category: 'Electronics', limit: 6 },
-                { query: 'home kitchen essentials', category: 'Home', limit: 6 },
-                { query: 'latest fashion trends clothing', category: 'Fashion', limit: 6 },
-                { query: 'trending beauty personal care', category: 'Beauty', limit: 6 },
-                { query: 'health household best sellers', category: 'Health', limit: 6 }
-            ];
-            const target = sections.find(s => s.category.toLowerCase() === category.toLowerCase());
-
-            if (target) {
-                const { runDailyScrape } = require('./services/scraper');
-                // We must import the specific function or logic if not exported, 
-                // but here we can reuse runDailyScrape logic or just export scrapeCategory
-                // Ideally, export scrapeCategory from services/scraper.js
-                const scraperService = require('./services/scraper');
-                await scraperService.scrapeCategory(target.query, target.category, target.limit);
-                return res.json({ message: `Scrape completed for ${target.category}` });
-            }
-            return res.status(400).json({ error: 'Invalid category' });
-        }
-
-        // If no category, try to run all (might timeout on Vercel)
-        await runDailyScrape();
-        res.json({ message: 'Full scraper completed' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Scrape failed', details: err.message });
-    }
-});
-
-// --- LEGACY ENDPOINTS (Backup) ---
-
-// Search Endpoint
-app.get('/api/search', async (req, res) => {
-    const { query } = req.query;
-    console.log(`[Scraper] Searching for: ${query}`);
-
-    if (!query) return res.status(400).json({ error: 'Missing query' });
-
-    const searchUrl = `https://www.amazon.com/s?k=${encodeURIComponent(query)}`;
-    const html = await fetchAmazonPage(searchUrl);
-
-    if (!html || html.includes('api-services-support@amazon.com')) {
-        console.warn('[Scraper] Amazon blocked or failed. Falling back to static data.');
-        const fallbackResults = searchStaticProducts(query);
-        return res.json({ data: { products: fallbackResults } });
-    }
-
-    const $ = cheerio.load(html);
-    const products = [];
-
-    $('.s-result-item[data-asin]').each((i, el) => {
-        const asin = $(el).attr('data-asin');
-        if (!asin) return;
-
-        // robust selectors
-        const title = $(el).find('h2 span').text().trim() || $(el).find('.a-text-normal').first().text().trim();
-
-        let priceRaw = $(el).find('.a-price .a-offscreen').first().text().trim();
-        if (!priceRaw) {
-            const priceWhole = $(el).find('.a-price-whole').first().text().trim();
-            const priceFraction = $(el).find('.a-price-fraction').first().text().trim();
-            if (priceWhole) priceRaw = `${priceWhole}.${priceFraction}`;
-        }
-
-        // Parse float
-        let price = 0; // Default for legacy API view
-        if (priceRaw) {
-            price = parseFloat(priceRaw.replace(/[^\d.]/g, '')) || 0;
-        }
-
-        const image = $(el).find('.s-image').attr('src');
-        let link = $(el).find('a.a-link-normal').first().attr('href');
-
-        if (link && !link.startsWith('http')) {
-            link = 'https://www.amazon.com' + link;
-        }
-
-        if (title && image) {
-            products.push({
-                asin,
-                product_title: title,
-                product_price: price || null,
-                product_photo: image,
-                product_url: link,
-                product_star_rating: 'N/A',
-                product_num_ratings: 0
-            });
-        }
-    });
-
-    if (products.length === 0) {
-        console.warn('[Scraper] No products parsed from HTML. Falling back to static data.');
-        const fallbackResults = searchStaticProducts(query);
-        return res.json({ data: { products: fallbackResults } });
-    }
-
-    console.log(`[Scraper] Found ${products.length} items`);
-    res.json({ data: { products: products.slice(0, 40) } });
-});
-
-// Product Details Endpoint (Basic)
-app.get('/api/product', async (req, res) => {
+// Helper for single product (search by ASIN in memory)
+app.get('/api/product', (req, res) => {
     const { asin } = req.query;
-    if (!asin) return res.status(400).json({ error: 'Missing ASIN' });
-
-    console.log(`[Scraper] Fetching product: ${asin}`);
-    const productUrl = `https://www.amazon.com/dp/${asin}`;
-    const html = await fetchAmazonPage(productUrl);
-
-    if (!html) {
-        console.warn('[Scraper] Product fetch failed. Trying static lookup.');
-        // Try to find in static data (though ID might not match exactly if ASIN is real)
-        // For demo, we just return a generic static error or mock
-        const staticMatch = staticProductsData.products.find(p => p.amazon_url.includes(asin) || p.id == asin);
-        if (staticMatch) {
-            return res.json({
-                data: {
-                    product_title: staticMatch.title,
-                    product_price: `$${staticMatch.price}`,
-                    product_photo: staticMatch.image,
-                    product_description: staticMatch.description,
-                    about_product: []
-                }
-            });
-        }
-        return res.status(500).json({ error: 'Failed to fetch product' });
+    const product = PRODUCTS_CACHE.find(p => p.asin === asin);
+    if (product) {
+        return res.json({
+            status: 'OK',
+            data: {
+                product_title: product.title,
+                product_price: product.price,
+                product_photo: product.image,
+                product_url: product.url,
+                category: product.category,
+                product_description: product.title // Fallback description
+            }
+        });
     }
-
-    const $ = cheerio.load(html);
-
-    // Basic Parsing
-    const title = $('#productTitle').text().trim();
-    const price = $('.a-price .a-offscreen').first().text().trim();
-    const description = $('#feature-bullets ul').html() ||
-        $('#productDescription').html() ||
-        $('meta[name="description"]').attr('content') ||
-        'No description available.';
-    const image = $('#landingImage').attr('src');
-
-    res.json({
-        data: {
-            product_title: title,
-            product_price: price,
-            product_photo: image,
-            product_description: description,
-            about_product: []
-        }
-    });
+    res.status(404).json({ error: 'Product not found' });
 });
 
-// Helper: Search static products
-function searchStaticProducts(query) {
-    const q = query.toLowerCase();
-    const all = staticProductsData.products.map(transformStaticProduct);
+// Search API (Filter memory)
+app.get('/api/search', (req, res) => {
+    const { query } = req.query;
+    if (!query) return res.status(400).json({ error: 'Query required' });
 
-    // Simple filter
-    const matches = all.filter(p =>
-        p.product_title.toLowerCase().includes(q) ||
-        (p.category && p.category.toLowerCase().includes(q)) ||
-        q.includes(p.category ? p.category.toLowerCase() : 'xyz')
+    const lowerQ = query.toLowerCase();
+    const results = PRODUCTS_CACHE.filter(p =>
+        (p.title && p.title.toLowerCase().includes(lowerQ)) ||
+        (p.category && p.category.toLowerCase().includes(lowerQ))
     );
 
-    // If no specific matches, return a subset of "Latest" or random to fill UI
-    if (matches.length < 4) {
-        return all.sort(() => 0.5 - Math.random()).slice(0, 8);
-    }
-
-    return matches;
-}
-
-function transformStaticProduct(p) {
-    return {
-        asin: p.id, // map numeric ID to asin field
+    const formatted = results.slice(0, 40).map(p => ({
+        asin: p.asin,
         product_title: p.title,
-        product_price: `$${p.price.toFixed(2)}`,
+        product_price: p.price || 0,
         product_photo: p.image,
-        product_url: p.amazon_url,
+        product_url: p.url,
+        is_best_seller: p.isBestSeller,
         product_star_rating: '4.5',
-        product_num_ratings: 100,
-        category: p.category
-    };
-}
+        product_num_ratings: 0
+    }));
 
-// Serve index.html for root
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.json({
+        status: 'OK',
+        data: {
+            products: formatted
+        }
+    });
 });
 
-module.exports = app;
-
-if (require.main === module) {
-    app.listen(PORT, () => {
-        console.log(`Server running on http://localhost:${PORT}`);
-    });
-}
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
