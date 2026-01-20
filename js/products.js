@@ -134,7 +134,7 @@ async function fetchProductsFromApi(query) {
         else if (lowerQuery.includes('fashion')) dbCategory = 'Fashion & Lifestyle';
         else if (lowerQuery.includes('beauty')) dbCategory = 'Beauty & Personal Care';
         else if (lowerQuery.includes('health')) dbCategory = 'Health & Household';
-        else if (lowerQuery.includes('trending amazon finds')) dbCategory = 'all';
+        else if (lowerQuery.includes('trending amazon finds') || lowerQuery.includes('bestselling products')) dbCategory = 'all';
 
         // Always check DB for mapped categories
         if (dbCategory !== 'General' || lowerQuery.includes('trending') || lowerQuery.includes('best')) {
