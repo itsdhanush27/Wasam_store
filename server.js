@@ -24,6 +24,17 @@ app.use(cors());
 app.use(express.static(path.join(__dirname), { extensions: ['html'] }));
 app.use(express.json());
 
+// Global Error Handlers to prevent crash on DB fail
+process.on('uncaughtException', (err) => {
+    console.error('UNCAUGHT EXCEPTION:', err);
+    // Keep running
+});
+
+process.on('unhandledRejection', (err) => {
+    console.error('UNHANDLED REJECTION:', err);
+    // Keep running
+});
+
 // Helper: User-Agent Rotation
 const USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
