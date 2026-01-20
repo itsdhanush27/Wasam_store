@@ -137,7 +137,7 @@ async function fetchProductsFromApi(query) {
 
         // Always check DB for mapped categories
         if (dbCategory !== 'General' || query.includes('trending') || query.includes('best')) {
-          const dbRes = await fetch(`/api/top-products?category=${dbCategory}&limit=10`);
+          const dbRes = await fetch(`/api/top-products?category=${encodeURIComponent(dbCategory)}&limit=10`);
           const dbData = await dbRes.json();
 
           if (dbData.data && dbData.data.products && dbData.data.products.length > 0) {
