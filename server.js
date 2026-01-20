@@ -135,10 +135,43 @@ app.get('/api/top-products', async (req, res) => {
     }
 });
 
-// Manual Trigger for Scraper (Useful for testing)
+// Manual Trigger for Scraper (Useful for testing & Vercel)
 app.get('/api/trigger-scrape', async (req, res) => {
-    runDailyScrape();
-    res.json({ message: 'Scraper started in background' });
+    const { category } = req.query;
+    try {
+        console.log('[API] Triggering scrape...');
+        // Vercel serverless requires waiting for the task
+        // We allow scraping a specific category to fit in timeout limits
+        if (category) {
+            const sections = [
+                { query: 'trending amazon finds', category: 'Latest', limit: 8 },
+                { query: 'best electronics gadgets', category: 'Electronics', limit: 6 },
+                { query: 'home kitchen essentials', category: 'Home', limit: 6 },
+                { query: 'latest fashion trends clothing', category: 'Fashion', limit: 6 },
+                { query: 'trending beauty personal care', category: 'Beauty', limit: 6 },
+                { query: 'health household best sellers', category: 'Health', limit: 6 }
+            ];
+            const target = sections.find(s => s.category.toLowerCase() === category.toLowerCase());
+
+            if (target) {
+                const { runDailyScrape } = require('./services/scraper');
+                // We must import the specific function or logic if not exported, 
+                // but here we can reuse runDailyScrape logic or just export scrapeCategory
+                // Ideally, export scrapeCategory from services/scraper.js
+                const scraperService = require('./services/scraper');
+                await scraperService.scrapeCategory(target.query, target.category, target.limit);
+                return res.json({ message: `Scrape completed for ${target.category}` });
+            }
+            return res.status(400).json({ error: 'Invalid category' });
+        }
+
+        // If no category, try to run all (might timeout on Vercel)
+        await runDailyScrape();
+        res.json({ message: 'Full scraper completed' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Scrape failed', details: err.message });
+    }
 });
 
 // --- LEGACY ENDPOINTS (Backup) ---

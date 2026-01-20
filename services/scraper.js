@@ -123,4 +123,4 @@ const runDailyScrape = async () => {
     console.log('--- DAILY SCRAPE COMPLETED ---');
 };
 
-module.exports = { runDailyScrape };
+module.exports = { runDailyScrape, scrapeCategory };
